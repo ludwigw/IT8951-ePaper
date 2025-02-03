@@ -111,4 +111,6 @@ UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Ta
         free(Refresh_Frame_Buf);
         Refresh_Frame_Buf = NULL;
     }
+    return 0;
+}
 
