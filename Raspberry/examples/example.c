@@ -52,8 +52,9 @@ parameter:
     Panel_Height: Height of the panel
     Init_Target_Memory_Addr: Memory address of IT8951 target memory address
     BitsPerPixel: Bits Per Pixel, 2^BitsPerPixel = grayscale
+    bmp_path: Path to the BMP file
 ******************************************************************************/
-UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Target_Memory_Addr, UBYTE BitsPerPixel){
+UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Target_Memory_Addr, UBYTE BitsPerPixel, const char* bmp_path){
     UWORD WIDTH;
     if(Four_Byte_Align == true){
         WIDTH  = Panel_Width - (Panel_Width % 32);
@@ -76,11 +77,7 @@ UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Ta
     Paint_SetBitsPerPixel(BitsPerPixel);
     Paint_Clear(WHITE);
 
-    char Path[30];
-    // sprintf(Path,"./pic/%dx%d_0.bmp", WIDTH, HEIGHT);
-    sprintf(Path, "./pic/render.bmp");
-
-    GUI_ReadBmp(Path, 0, 0);
+    GUI_ReadBmp(bmp_path, 0, 0);
 
     //you can draw your character and pattern on the image, for color definition of all BitsPerPixel, you can refer to GUI_Paint.h, 
     //Paint_DrawRectangle(50, 50, WIDTH/2, HEIGHT/2, 0x30, DOT_PIXEL_3X3, DRAW_FILL_EMPTY);
@@ -115,7 +112,3 @@ UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Ta
         Refresh_Frame_Buf = NULL;
     }
 
-    DEV_Delay_ms(5000);
-
-    return 0;
-}

@@ -68,9 +68,9 @@ int main(int argc, char *argv[])
         Debug("Example: sudo ./epd -2.51\r\n");
         exit(1);
     }
-	if (argc != 3){
-		Debug("Please input e-Paper display mode!\r\n");
-		Debug("Example: sudo ./epd -2.51 0 or sudo ./epd -2.51 1\r\n");
+	if (argc != 4){
+		Debug("Please input e-Paper display mode and BMP file path!\r\n");
+		Debug("Example: sudo ./epd -2.51 0 ./pic/render.bmp\r\n");
 		Debug("Now, 10.3 inch glass panle is mode1, else is mode0\r\n");
 		Debug("If you don't know what to type in just type 0 \r\n");
 		exit(1);
@@ -88,6 +88,9 @@ int main(int argc, char *argv[])
 	sscanf(argv[2],"%d",&epd_mode);
     Debug("Display mode:%d\r\n", epd_mode);
     Dev_Info = EPD_IT8951_Init(VCOM);
+
+    char* bmp_path = argv[3];
+    Debug("BMP file path:%s\r\n", bmp_path);
 
 #if(Enhance)
     Debug("Attention! Enhanced driving ability, only used when the screen is blurred\r\n");
@@ -127,7 +130,7 @@ int main(int argc, char *argv[])
 
 #if(USE_Normal_Demo)
     //Show a bmp file
-    Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_4);
+    Display_BMP_Example(Panel_Width, Panel_Height, Init_Target_Memory_Addr, BitsPerPixel_4, bmp_path);
     // EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, GC16_Mode);
 
 #endif
