@@ -78,7 +78,7 @@ UBYTE Display_BMP_Example(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Ta
 
     char Path[30];
     // sprintf(Path,"./pic/%dx%d_0.bmp", WIDTH, HEIGHT);
-    sprintf(Path, "./pic/render.bmp")
+    sprintf(Path, "./pic/render.bmp");
 
     GUI_ReadBmp(Path, 0, 0);
 
