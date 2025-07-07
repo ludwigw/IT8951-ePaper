@@ -8,6 +8,11 @@
 * | Date        :   2020-08-25
 * | Info        :   Here is an English version of the documentation for your quick use.
 ******************************************************************************/
+
+// ---
+// NOTE: For the most up-to-date and detailed documentation, including troubleshooting and real-world usage for displaying images on WaveShare e-ink devices from a Raspberry Pi, see the new documentation in the /docs directory.
+// ---
+
 This document is to help you use this routine.
 For ease of maintenance and development, we have integrated all the parallel epd Raspberry Pie example programs into this project.
 Here is a brief description of the use of this project.
