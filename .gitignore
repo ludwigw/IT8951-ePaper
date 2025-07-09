@@ -1,5 +1,4 @@
-Raspberry/pic/*.bmp
-Raspberry/pic/*.png
-Raspberry/pic/*.jpg
+bin
 docs/api/html/
 docs/api/latex/
+docs/.DS_Store
