@@ -5,7 +5,7 @@
  * Provides GPIO, SPI, and timing functions for e-Paper display control on Raspberry Pi platforms
  * using the bcm2835 library.
  */
-#include "../../Raspberry/lib/Config/DEV_Config.h"
+#include "../../include/DEV_Config.h"
 #include <bcm2835.h>
 #include <fcntl.h>
 

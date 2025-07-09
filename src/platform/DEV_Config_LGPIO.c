@@ -5,7 +5,7 @@
  * Provides GPIO, SPI, and timing functions for e-Paper display control on Raspberry Pi 5 platforms
  * using the LGPIO library.
  */
-#include "../../Raspberry/lib/Config/DEV_Config.h"
+#include "../../include/DEV_Config.h"
 #include <lgpio.h>
 #include <fcntl.h>
 #include <stdio.h>

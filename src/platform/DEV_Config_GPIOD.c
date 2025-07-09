@@ -5,7 +5,7 @@
  * Provides GPIO, SPI, and timing functions for e-Paper display control on platforms
  * using the GPIOD and custom SPI libraries.
  */
-#include "../../Raspberry/lib/Config/DEV_Config.h"
+#include "../../include/DEV_Config.h"
 #include "../../Raspberry/lib/Config/RPI_gpiod.h"
 #include "../../Raspberry/lib/Config/dev_hardware_SPI.h"
 #include <fcntl.h>
