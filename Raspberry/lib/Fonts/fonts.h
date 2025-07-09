@@ -1,4 +1,14 @@
 /**
+ * @file fonts.h
+ * @brief Bitmap font data structures and font tables for e-Paper display text rendering.
+ *
+ * Provides font structures and font tables for rendering ASCII and Chinese (GB2312) text
+ * on e-Paper displays. Supports multiple font sizes and both English and Chinese characters.
+ *
+ * @author STMicroelectronics, Waveshare
+ * @date 2014-02-18, 2018-11-12
+ */
+/**
   ******************************************************************************
   * @file    fonts.h
   * @author  MCD Application Team
@@ -39,7 +49,7 @@
 #ifndef __FONTS_H
 #define __FONTS_H
 
-/*�������΢���ź�24 (32x41) */
+/*΢ź24 (32x41) */
 #define MAX_HEIGHT_FONT         41
 #define MAX_WIDTH_FONT          32
 #define OFFSET_BITMAP           
@@ -51,41 +61,62 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 
-//ASCII
-typedef struct _tFont
-{    
-  const uint8_t *table;
-  uint16_t Width;
-  uint16_t Height;
-  
+/**
+ * @brief Structure describing an ASCII (English) bitmap font.
+ */
+typedef struct _tFont {
+    const uint8_t *table;   /**< Pointer to font bitmap data. */
+    uint16_t Width;         /**< Character width in pixels. */
+    uint16_t Height;        /**< Character height in pixels. */
 } sFONT;
 
+/**
+ * @brief Structure describing a single Chinese (GB2312) character bitmap.
+ */
+typedef struct {
+    const char index[2];    /**< GB2312 character index (2 bytes). */
+    const char matrix[MAX_HEIGHT_FONT*MAX_WIDTH_FONT/8+2]; /**< Bitmap data. */
+} CH_CN;
 
-//GB2312
-typedef struct                                          // ������ģ���ݽṹ
-{
-  const  char index[2];                               // ������������
-  const  char matrix[MAX_HEIGHT_FONT*MAX_WIDTH_FONT/8+2];  // ����������
-}CH_CN;
+/**
+ * @brief Structure describing a Chinese (GB2312) font table.
+ */
+typedef struct {
+    const CH_CN *table;     /**< Pointer to array of Chinese character bitmaps. */
+    uint16_t size;          /**< Number of characters in the table. */
+    uint16_t ASCII_Width;   /**< Width of ASCII characters in this font. */
+    uint16_t Width;         /**< Character width in pixels. */
+    uint16_t Height;        /**< Character height in pixels. */
+} cFONT;
 
-
-typedef struct
-{    
-  const CH_CN *table;
-  uint16_t size;
-  uint16_t ASCII_Width;
-  uint16_t Width;
-  uint16_t Height;
-  
-}cFONT;
-
+/**
+ * @brief 24-pixel-high ASCII font.
+ */
 extern sFONT Font24;
+/**
+ * @brief 20-pixel-high ASCII font.
+ */
 extern sFONT Font20;
+/**
+ * @brief 16-pixel-high ASCII font.
+ */
 extern sFONT Font16;
+/**
+ * @brief 12-pixel-high ASCII font.
+ */
 extern sFONT Font12;
+/**
+ * @brief 8-pixel-high ASCII font.
+ */
 extern sFONT Font8;
 
+/**
+ * @brief 12-pixel-high Chinese (GB2312) font.
+ */
 extern cFONT Font12CN;
+/**
+ * @brief 24-pixel-high Chinese (GB2312) font.
+ */
 extern cFONT Font24CN;
 #ifdef __cplusplus
 }

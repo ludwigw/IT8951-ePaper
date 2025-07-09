@@ -1,75 +1,52 @@
-/*****************************************************************************
-* | File      	:   EPD_IT8951.h
-* | Author      :   Waveshare team
-* | Function    :   IT8951 Common driver
-* | Info        :
-*----------------
-* |	This version:   V1.0
-* | Date        :   2019-09-17
-* | Info        :
-* -----------------------------------------------------------------------------
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documnetation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to  whom the Software is
-# furished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-#
-******************************************************************************/
+/**
+ * @file EPD_IT8951.h
+ * @brief Driver interface for the IT8951 e-Paper controller.
+ *
+ * Provides functions and data structures for initializing, refreshing, and controlling
+ * e-Paper displays using the IT8951 controller. Supports multiple bit depths, partial updates,
+ * and platform-agnostic hardware abstraction.
+ *
+ * @author Waveshare
+ * @date 2019-09-17
+ */
 #ifndef __EPD_IT8951_H_
 #define __EPD_IT8951_H_
 
 #include <stdbool.h>
-
 #include "../Config/DEV_Config.h"
 
+/**
+ * @brief Image load information for IT8951 controller.
+ */
+typedef struct IT8951_Load_Img_Info {
+    UWORD    Endian_Type;         /**< Endian type: little or big endian. */
+    UWORD    Pixel_Format;        /**< Pixel format (bit depth). */
+    UWORD    Rotate;              /**< Rotation mode. */
+    UBYTE*   Source_Buffer_Addr;  /**< Start address of source frame buffer. */
+    UDOUBLE  Target_Memory_Addr;  /**< Base address of target image buffer. */
+} IT8951_Load_Img_Info;
 
-// INIT mode, for every init or some time after A2 mode refresh
-extern UBYTE INIT_Mode;
-// GC16 mode, for every time to display 16 grayscale image
-extern UBYTE GC16_Mode;
-// A2 mode, for fast refresh without flash
-extern UBYTE A2_Mode;
+/**
+ * @brief Area information for partial image updates.
+ */
+typedef struct IT8951_Area_Img_Info {
+    UWORD Area_X; /**< X coordinate of area. */
+    UWORD Area_Y; /**< Y coordinate of area. */
+    UWORD Area_W; /**< Width of area. */
+    UWORD Area_H; /**< Height of area. */
+} IT8951_Area_Img_Info;
 
-
-typedef struct IT8951_Load_Img_Info
-{
-    UWORD    Endian_Type;         //little or Big Endian
-    UWORD    Pixel_Format;        //bpp
-    UWORD    Rotate;              //Rotate mode
-    UBYTE*  Source_Buffer_Addr;  //Start address of source Frame buffer
-    UDOUBLE  Target_Memory_Addr;  //Base address of target image buffer
-}IT8951_Load_Img_Info;
-
-typedef struct IT8951_Area_Img_Info
-{
-    UWORD Area_X;
-    UWORD Area_Y;
-    UWORD Area_W;
-    UWORD Area_H;
-}IT8951_Area_Img_Info;
-
-typedef struct IT8951_Dev_Info
-{
-    UWORD Panel_W;
-    UWORD Panel_H;
-    UWORD Memory_Addr_L;
-    UWORD Memory_Addr_H;
-    UWORD FW_Version[8];
-    UWORD LUT_Version[8];
-}IT8951_Dev_Info;
+/**
+ * @brief Device information structure for IT8951.
+ */
+typedef struct IT8951_Dev_Info {
+    UWORD Panel_W; /**< Panel width. */
+    UWORD Panel_H; /**< Panel height. */
+    UWORD Memory_Addr_L; /**< Low part of memory address. */
+    UWORD Memory_Addr_H; /**< High part of memory address. */
+    UWORD FW_Version[8]; /**< Firmware version. */
+    UWORD LUT_Version[8]; /**< LUT version. */
+} IT8951_Dev_Info;
 
 /*-----------------------------------------------------------------------
 IT8951 Command defines
@@ -150,60 +127,112 @@ IT8951 Registers defines
 #define MCSR  (MCSR_BASE_ADDR + 0x0000)
 #define LISAR (MCSR_BASE_ADDR + 0x0008)
 
-
-/*
-void EPD_IT8951_SystemRun();
-void EPD_IT8951_Standby();
-void EPD_IT8951_Sleep();
-
-UWORD EPD_IT8951_ReadReg(UWORD Reg_Address);
-void EPD_IT8951_WriteReg(UWORD Reg_Address,UWORD Reg_Value);
-UWORD EPD_IT8951_GetVCOM(void);
-void EPD_IT8951_SetVCOM(UWORD VCOM);
-
-void EPD_IT8951_LoadImgStart( IT8951_Load_Img_Info* Load_Img_Info );
-void EPD_IT8951_LoadImgAreaStart( IT8951_Load_Img_Info* Load_Img_Info, IT8951_Area_Img_Info* Area_Img_Info );
-void EPD_IT8951_LoadImgEnd(void);
-
-void EPD_IT8951_GetSystemInfo(void* Buf);
-void EPD_IT8951_SetTargetMemoryAddr(UDOUBLE Target_Memory_Addr);
-void EPD_IT8951_WaitForDisplayReady(void);
-
-
-void EPD_IT8951_HostAreaPackedPixelWrite_8bp(IT8951_Load_Img_Info*Load_Img_Info,IT8951_Area_Img_Info*Area_Img_Info);
-
-void EPD_IT8951_HostAreaPackedPixelWrite_1bp(IT8951_Load_Img_Info*Load_Img_Info,IT8951_Area_Img_Info*Area_Img_Info, bool Packed_Write);
-
-void EPD_IT8951_HostAreaPackedPixelWrite_2bp(IT8951_Load_Img_Info*Load_Img_Info,IT8951_Area_Img_Info*Area_Img_Info, bool Packed_Write);
-
-void EPD_IT8951_Display_Area(UWORD X,UWORD Y,UWORD W,UWORD H,UWORD Mode);
-void EPD_IT8951_Display_AreaBuf(UWORD X,UWORD Y,UWORD W,UWORD H,UWORD Mode, UDOUBLE Target_Memory_Addr);
-
-void EPD_IT8951_Display_1bp(UWORD X, UWORD Y, UWORD W, UWORD H, UWORD Mode,UDOUBLE Target_Memory_Addr, UBYTE Front_Gray_Val, UBYTE Back_Gray_Val);
-*/
-
+/**
+ * @brief Enhance the driving capability of the e-Paper display (platform-specific tuning).
+ */
 void Enhance_Driving_Capability(void);
 
+/**
+ * @brief Bring the IT8951 controller out of standby and into system run mode.
+ */
 void EPD_IT8951_SystemRun(void);
 
+/**
+ * @brief Put the IT8951 controller into standby mode.
+ */
 void EPD_IT8951_Standby(void);
 
+/**
+ * @brief Put the IT8951 controller into sleep mode.
+ */
 void EPD_IT8951_Sleep(void);
 
+/**
+ * @brief Initialize the IT8951 controller and return device info.
+ * @param VCOM VCOM voltage setting.
+ * @return Device information structure.
+ */
 IT8951_Dev_Info EPD_IT8951_Init(UWORD VCOM);
 
-void EPD_IT8951_Clear_Refresh(IT8951_Dev_Info Dev_Info,UDOUBLE Target_Memory_Addr, UWORD Mode);
+/**
+ * @brief Clear the display and refresh with the given mode.
+ * @param Dev_Info Device information.
+ * @param Target_Memory_Addr Target memory address for the image buffer.
+ * @param Mode Display mode (e.g., INIT, GC16, A2).
+ */
+void EPD_IT8951_Clear_Refresh(IT8951_Dev_Info Dev_Info, UDOUBLE Target_Memory_Addr, UWORD Mode);
 
+/**
+ * @brief Refresh a region of the display with a 1bpp (monochrome) image buffer.
+ * @param Frame_Buf Pointer to the image buffer.
+ * @param X X coordinate.
+ * @param Y Y coordinate.
+ * @param W Width.
+ * @param H Height.
+ * @param Mode Display mode.
+ * @param Target_Memory_Addr Target memory address.
+ * @param Packed_Write Whether to use packed write mode.
+ */
 void EPD_IT8951_1bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, UBYTE Mode, UDOUBLE Target_Memory_Addr, bool Packed_Write);
-void EPD_IT8951_1bp_Multi_Frame_Write(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H,UDOUBLE Target_Memory_Addr, bool Packed_Write);
-void EPD_IT8951_1bp_Multi_Frame_Refresh(UWORD X, UWORD Y, UWORD W, UWORD H,UDOUBLE Target_Memory_Addr);
 
+/**
+ * @brief Write multiple 1bpp frames to the display memory.
+ * @param Frame_Buf Pointer to the image buffer.
+ * @param X X coordinate.
+ * @param Y Y coordinate.
+ * @param W Width.
+ * @param H Height.
+ * @param Target_Memory_Addr Target memory address.
+ * @param Packed_Write Whether to use packed write mode.
+ */
+void EPD_IT8951_1bp_Multi_Frame_Write(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, UDOUBLE Target_Memory_Addr, bool Packed_Write);
+
+/**
+ * @brief Refresh the display from multiple 1bpp frames in memory.
+ * @param X X coordinate.
+ * @param Y Y coordinate.
+ * @param W Width.
+ * @param H Height.
+ * @param Target_Memory_Addr Target memory address.
+ */
+void EPD_IT8951_1bp_Multi_Frame_Refresh(UWORD X, UWORD Y, UWORD W, UWORD H, UDOUBLE Target_Memory_Addr);
+
+/**
+ * @brief Refresh a region of the display with a 2bpp (4-level grayscale) image buffer.
+ * @param Frame_Buf Pointer to the image buffer.
+ * @param X X coordinate.
+ * @param Y Y coordinate.
+ * @param W Width.
+ * @param H Height.
+ * @param Hold Whether to hold the display after refresh.
+ * @param Target_Memory_Addr Target memory address.
+ * @param Packed_Write Whether to use packed write mode.
+ */
 void EPD_IT8951_2bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, bool Hold, UDOUBLE Target_Memory_Addr, bool Packed_Write);
 
+/**
+ * @brief Refresh a region of the display with a 4bpp (16-level grayscale) image buffer.
+ * @param Frame_Buf Pointer to the image buffer.
+ * @param X X coordinate.
+ * @param Y Y coordinate.
+ * @param W Width.
+ * @param H Height.
+ * @param Hold Whether to hold the display after refresh.
+ * @param Target_Memory_Addr Target memory address.
+ * @param Packed_Write Whether to use packed write mode.
+ */
 void EPD_IT8951_4bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, bool Hold, UDOUBLE Target_Memory_Addr, bool Packed_Write);
 
+/**
+ * @brief Refresh a region of the display with an 8bpp (256-level grayscale) image buffer.
+ * @param Frame_Buf Pointer to the image buffer.
+ * @param X X coordinate.
+ * @param Y Y coordinate.
+ * @param W Width.
+ * @param H Height.
+ * @param Hold Whether to hold the display after refresh.
+ * @param Target_Memory_Addr Target memory address.
+ */
 void EPD_IT8951_8bp_Refresh(UBYTE *Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, bool Hold, UDOUBLE Target_Memory_Addr);
-
-
 
 #endif

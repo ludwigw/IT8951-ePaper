@@ -30,3 +30,8 @@ See the [`/docs`](./docs) directory for:
 - Architecture and code structure
 - How to display images on WaveShare e-ink devices
 - Troubleshooting and common hacks for Raspberry Pi Zero W2
+
+## 📚 API Documentation
+
+- [Browse the full API reference (HTML, Doxygen)](docs/api/html/index.html)
+- To regenerate the docs: run `make apidocs`

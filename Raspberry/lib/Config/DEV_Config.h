@@ -1,50 +1,15 @@
-/*****************************************************************************
-* | File      	:   DEV_Config.h
-* | Author      :   Waveshare team
-* | Function    :   Hardware underlying interface
-* | Info        :
-*                Used to shield the underlying layers of each master
-*                and enhance portability
-*----------------
-* |	This version:   V2.0
-* | Date        :   2018-10-30
-* | Info        :
-* 1.add:
-*   UBYTE\UWORD\UDOUBLE
-* 2.Change:
-*   EPD_RST -> EPD_RST_PIN
-*   EPD_DC -> EPD_DC_PIN
-*   EPD_CS -> EPD_CS_PIN
-*   EPD_BUSY -> EPD_BUSY_PIN
-* 3.Remote:
-*   EPD_RST_1\EPD_RST_0
-*   EPD_DC_1\EPD_DC_0
-*   EPD_CS_1\EPD_CS_0
-*   EPD_BUSY_1\EPD_BUSY_0
-* 3.add:
-*   #define DEV_Digital_Write(_pin, _value) bcm2835_GPIOI_write(_pin, _value)
-*   #define DEV_Digital_Read(_pin) bcm2835_GPIOI_lev(_pin)
-*   #define DEV_SPI_WriteByte(__value) bcm2835_spi_transfer(__value)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documnetation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to  whom the Software is
-# furished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-#
-******************************************************************************/
+/**
+ * @file DEV_Config.h
+ * @brief Device (hardware) abstraction layer for e-Paper display drivers.
+ *
+ * This module provides platform-agnostic functions for GPIO, SPI, and timing operations,
+ * enabling portability across different hardware platforms (e.g., Raspberry Pi, Jetson, etc.).
+ *
+ * All hardware-specific implementations are provided in platform-specific source files.
+ *
+ * @author Waveshare
+ * @date 2018-10-30
+ */
 #ifndef _DEV_CONFIG_H_
 #define _DEV_CONFIG_H_
 
@@ -68,43 +33,72 @@
     #include "dev_hardware_SPI.h"
 #endif
 
-
 #define HIGH   0x1
 #define LOW    0x0  
 
 /**
- * GPIO
- **/
- 
+ * @name GPIO Pin Definitions
+ * GPIO pin numbers for e-Paper control signals.
+ */
 #define EPD_RST_PIN  17
 #define EPD_CS_PIN   8
 #define EPD_BUSY_PIN 24
 
-
-
 /**
- * data
-**/
+ * @name Data Type Aliases
+ * Shorter aliases for unsigned integer types.
+ */
 #define UBYTE   uint8_t
 #define UWORD   uint16_t
 #define UDOUBLE uint32_t
 
-
-
-
-
-/*------------------------------------------------------------------------------------------------------*/
+/**
+ * @brief Write a digital value to a GPIO pin.
+ * @param Pin GPIO pin number.
+ * @param Value HIGH or LOW.
+ */
 void DEV_Digital_Write(UWORD Pin, UBYTE Value);
+
+/**
+ * @brief Read a digital value from a GPIO pin.
+ * @param Pin GPIO pin number.
+ * @return HIGH or LOW.
+ */
 UBYTE DEV_Digital_Read(UWORD Pin);
 
+/**
+ * @brief Write a byte over the SPI bus.
+ * @param Value Byte to send.
+ */
 void DEV_SPI_WriteByte(UBYTE Value);
+
+/**
+ * @brief Read a byte from the SPI bus.
+ * @return Byte read from SPI.
+ */
 UBYTE DEV_SPI_ReadByte();
 
+/**
+ * @brief Delay for a specified number of milliseconds.
+ * @param xms Number of milliseconds to delay.
+ */
 void DEV_Delay_ms(UDOUBLE xms);
+
+/**
+ * @brief Delay for a specified number of microseconds.
+ * @param xus Number of microseconds to delay.
+ */
 void DEV_Delay_us(UDOUBLE xus);
 
+/**
+ * @brief Initialize the device (GPIO, SPI, etc.).
+ * @return 0 on success, nonzero on failure.
+ */
 UBYTE DEV_Module_Init(void);
-void DEV_Module_Exit(void);
 
+/**
+ * @brief Deinitialize the device and release resources.
+ */
+void DEV_Module_Exit(void);
 
 #endif

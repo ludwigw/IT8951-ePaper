@@ -1,67 +1,14 @@
-/******************************************************************************
-* | File      	:   GUI_Paint.h
-* | Author      :   Waveshare electronics
-* | Function    :	Achieve drawing: draw points, lines, boxes, circles and
-*                   their size, solid dotted line, solid rectangle hollow
-*                   rectangle, solid circle hollow circle.
-* | Info        :
-*   Achieve display characters: Display a single character, string, number
-*   Achieve time display: adaptive size display time minutes and seconds
-*----------------
-* |	This version:   V3.0
-* | Date        :   2019-04-18
-* | Info        :
-* -----------------------------------------------------------------------------
-* V3.0(2019-04-18):
-* 1.Change: 
-*    Paint_DrawPoint(..., DOT_STYLE DOT_STYLE)
-* => Paint_DrawPoint(..., DOT_STYLE Dot_Style)
-*    Paint_DrawLine(..., LINE_STYLE Line_Style, DOT_PIXEL Dot_Pixel)
-* => Paint_DrawLine(..., DOT_PIXEL Line_width, LINE_STYLE Line_Style)
-*    Paint_DrawRectangle(..., DRAW_FILL Filled, DOT_PIXEL Dot_Pixel)
-* => Paint_DrawRectangle(..., DOT_PIXEL Line_width, DRAW_FILL Draw_Fill)
-*    Paint_DrawCircle(..., DRAW_FILL Draw_Fill, DOT_PIXEL Dot_Pixel)
-* => Paint_DrawCircle(..., DOT_PIXEL Line_width, DRAW_FILL Draw_Filll)
-*
-* -----------------------------------------------------------------------------
-* V2.0(2018-11-15):
-* 1.add: Paint_NewImage()
-*    Create an image's properties
-* 2.add: Paint_SelectImage()
-*    Select the picture to be drawn
-* 3.add: Paint_SetRotate()
-*    Set the direction of the cache    
-* 4.add: Paint_RotateImage() 
-*    Can flip the picture, Support 0-360 degrees, 
-*    but only 90.180.270 rotation is better
-* 4.add: Paint_SetMirroring() 
-*    Can Mirroring the picture, horizontal, vertical, origin
-* 5.add: Paint_DrawString_CN() 
-*    Can display Chinese(GB1312)   
-*
-* ----------------------------------------------------------------------------- 
-* V1.0(2018-07-17):
-*   Create library
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documnetation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to  whom the Software is
-* furished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*
-******************************************************************************/
+/**
+ * @file GUI_Paint.h
+ * @brief Drawing and image buffer management for e-Paper displays.
+ *
+ * Provides functions for drawing primitives (points, lines, rectangles, circles),
+ * rendering text (ASCII and Chinese), and managing image buffers for e-Paper displays.
+ * Supports multiple bit depths, rotation, mirroring, and grayscale.
+ *
+ * @author Waveshare
+ * @date 2019-04-18
+ */
 #ifndef __GUI_PAINT_H
 #define __GUI_PAINT_H
 
@@ -69,153 +16,278 @@
 #include "../Fonts/fonts.h"
 
 /**
- * Image attributes
-**/
+ * @brief Image buffer attributes and drawing context.
+ */
 typedef struct {
-    UBYTE *Image;
-    UWORD Width;
-    UWORD Height;
-    UWORD WidthMemory;
-    UWORD HeightMemory;
-    UWORD Color;
-    UWORD Rotate;
-    UWORD Mirror;
-    UWORD WidthByte;
-    UWORD HeightByte;
-    UWORD BitsPerPixel;
-    UWORD GrayScale;
+    UBYTE *Image;           /**< Pointer to image buffer. */
+    UWORD Width;            /**< Width of the drawing area. */
+    UWORD Height;           /**< Height of the drawing area. */
+    UWORD WidthMemory;      /**< Width of the memory buffer. */
+    UWORD HeightMemory;     /**< Height of the memory buffer. */
+    UWORD Color;            /**< Default color. */
+    UWORD Rotate;           /**< Rotation setting. */
+    UWORD Mirror;           /**< Mirroring setting. */
+    UWORD WidthByte;        /**< Bytes per row. */
+    UWORD HeightByte;       /**< Bytes per column. */
+    UWORD BitsPerPixel;     /**< Bits per pixel. */
+    UWORD GrayScale;        /**< Number of grayscale levels. */
 } PAINT;
 extern PAINT Paint;
 
 /**
- * Display rotate
-**/
+ * @brief Display rotation options.
+ */
 #define ROTATE_0            0
 #define ROTATE_90           90
 #define ROTATE_180          180
 #define ROTATE_270          270
 
 /**
- * Display Flip
-**/
+ * @brief Display mirroring options.
+ */
 typedef enum {
-    MIRROR_NONE  = 0x00,
-    MIRROR_HORIZONTAL = 0x01,
-    MIRROR_VERTICAL = 0x02,
-    MIRROR_ORIGIN = 0x03,
+    MIRROR_NONE  = 0x00,         /**< No mirroring. */
+    MIRROR_HORIZONTAL = 0x01,    /**< Horizontal mirror. */
+    MIRROR_VERTICAL = 0x02,      /**< Vertical mirror. */
+    MIRROR_ORIGIN = 0x03,        /**< Mirror both axes. */
 } MIRROR_IMAGE;
 #define MIRROR_IMAGE_DFT MIRROR_NONE
 
 /**
- * image color
-**/
+ * @brief Common color definitions.
+ */
 #define WHITE          0xFF
 #define BLACK          0x00
-
 #define IMAGE_BACKGROUND    WHITE
 #define FONT_FOREGROUND     BLACK
 #define FONT_BACKGROUND     WHITE
 
-/*
-For color definition of all BitsPerPixel, you can refer to this:
-
-8bpp:  0x00-0xF0, as for 8bp will automatically reduce to 4bp, the detail value of 8bp is:
-0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xA0 0xB0 0xC0 0xE0 0xF0 16 grayscale in total
-which only occupy upper 4 bits of a byte
-
-4bpp:  0x00-0xF0
-0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xA0 0xB0 0xC0 0xE0 0xF0 16 grayscale in total
-which only occupy upper 4 bits of a byte
-
-2bpp:  0x00-0xC0
-0x00 0x40 0x80 0xC0 4 grayscale in total
-which only occupy upper 2 bits of a byte
-
-1bpp:  0x00-0x80
-0x00 0x80 2 grayscale in total
-which only occupy upper 1 bits of a byte
-*/
-
-
 /**
- * The size of the point
-**/
+ * @brief Dot (point) size options.
+ */
 typedef enum {
-    DOT_PIXEL_1X1  = 1,		// 1 x 1
-    DOT_PIXEL_2X2  , 		// 2 X 2
-    DOT_PIXEL_3X3  ,		// 3 X 3
-    DOT_PIXEL_4X4  ,		// 4 X 4
-    DOT_PIXEL_5X5  , 		// 5 X 5
-    DOT_PIXEL_6X6  , 		// 6 X 6
-    DOT_PIXEL_7X7  , 		// 7 X 7
-    DOT_PIXEL_8X8  , 		// 8 X 8
+    DOT_PIXEL_1X1  = 1,      /**< 1x1 dot. */
+    DOT_PIXEL_2X2,           /**< 2x2 dot. */
+    DOT_PIXEL_3X3,           /**< 3x3 dot. */
+    DOT_PIXEL_4X4,           /**< 4x4 dot. */
+    DOT_PIXEL_5X5,           /**< 5x5 dot. */
+    DOT_PIXEL_6X6,           /**< 6x6 dot. */
+    DOT_PIXEL_7X7,           /**< 7x7 dot. */
+    DOT_PIXEL_8X8,           /**< 8x8 dot. */
 } DOT_PIXEL;
-#define DOT_PIXEL_DFT  DOT_PIXEL_1X1  //Default dot pilex
+#define DOT_PIXEL_DFT  DOT_PIXEL_1X1
 
 /**
- * Point size fill style
-**/
+ * @brief Dot fill style options.
+ */
 typedef enum {
-    DOT_FILL_AROUND  = 1,		// dot pixel 1 x 1
-    DOT_FILL_RIGHTUP  , 		// dot pixel 2 X 2
+    DOT_FILL_AROUND  = 1,    /**< Fill around center. */
+    DOT_FILL_RIGHTUP,        /**< Fill right/up. */
 } DOT_STYLE;
-#define DOT_STYLE_DFT  DOT_FILL_AROUND  //Default dot pilex
+#define DOT_STYLE_DFT  DOT_FILL_AROUND
 
 /**
- * Line style, solid or dashed
-**/
+ * @brief Line style options.
+ */
 typedef enum {
-    LINE_STYLE_SOLID = 0,
-    LINE_STYLE_DOTTED,
+    LINE_STYLE_SOLID = 0,    /**< Solid line. */
+    LINE_STYLE_DOTTED,       /**< Dotted line. */
 } LINE_STYLE;
 
 /**
- * Whether the graphic is filled
-**/
+ * @brief Rectangle/circle fill options.
+ */
 typedef enum {
-    DRAW_FILL_EMPTY = 0,
-    DRAW_FILL_FULL,
+    DRAW_FILL_EMPTY = 0,     /**< No fill. */
+    DRAW_FILL_FULL,          /**< Filled. */
 } DRAW_FILL;
 
 /**
- * Custom structure of a time attribute
-**/
+ * @brief Structure for representing time (for time display functions).
+ */
 typedef struct {
-    UWORD Year;  //0000
-    UBYTE  Month; //1 - 12
-    UBYTE  Day;   //1 - 30
-    UBYTE  Hour;  //0 - 23
-    UBYTE  Min;   //0 - 59
-    UBYTE  Sec;   //0 - 59
+    UWORD Year;      /**< Year (e.g., 2023). */
+    UBYTE Month;     /**< Month (1-12). */
+    UBYTE Day;       /**< Day (1-31). */
+    UBYTE Hour;      /**< Hour (0-23). */
+    UBYTE Min;       /**< Minute (0-59). */
+    UBYTE Sec;       /**< Second (0-59). */
 } PAINT_TIME;
 extern PAINT_TIME sPaint_time;
 
-//init and Clear
+/**
+ * @brief Initialize a new image buffer for drawing.
+ * @param image Pointer to the image buffer.
+ * @param Width Width of the image.
+ * @param Height Height of the image.
+ * @param Rotate Rotation setting.
+ * @param Color Default color (background).
+ */
 void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD Color);
+
+/**
+ * @brief Select the image buffer to draw on.
+ * @param image Pointer to the image buffer.
+ */
 void Paint_SelectImage(UBYTE *image);
+
+/**
+ * @brief Set the rotation for drawing operations.
+ * @param Rotate Rotation angle (0, 90, 180, 270).
+ */
 void Paint_SetRotate(UWORD Rotate);
+
+/**
+ * @brief Set the mirroring mode for drawing operations.
+ * @param mirror Mirroring mode.
+ */
 void Paint_SetMirroring(UBYTE mirror);
+
+/**
+ * @brief Set the bits per pixel for the image buffer.
+ * @param bpp Bits per pixel (1, 2, 4, or 8).
+ */
 void Paint_SetBitsPerPixel(UBYTE bpp);
+
+/**
+ * @brief Set a pixel in the image buffer.
+ * @param Xpoint X coordinate.
+ * @param Ypoint Y coordinate.
+ * @param Color Color value.
+ */
 void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color);
 
+/**
+ * @brief Clear the entire image buffer to a color.
+ * @param Color Color value to fill.
+ */
 void Paint_Clear(UWORD Color);
+
+/**
+ * @brief Clear a rectangular window in the image buffer.
+ * @param Xstart Starting X coordinate.
+ * @param Ystart Starting Y coordinate.
+ * @param Xend Ending X coordinate.
+ * @param Yend Ending Y coordinate.
+ * @param Color Color value to fill.
+ */
 void Paint_ClearWindows(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD Color);
 
-//Drawing
+/**
+ * @brief Draw a point (dot) at the specified location.
+ * @param Xpoint X coordinate.
+ * @param Ypoint Y coordinate.
+ * @param Color Color value.
+ * @param Dot_Pixel Dot size.
+ * @param Dot_FillWay Dot fill style.
+ */
 void Paint_DrawPoint(UWORD Xpoint, UWORD Ypoint, UWORD Color, DOT_PIXEL Dot_Pixel, DOT_STYLE Dot_FillWay);
+
+/**
+ * @brief Draw a line between two points.
+ * @param Xstart Starting X coordinate.
+ * @param Ystart Starting Y coordinate.
+ * @param Xend Ending X coordinate.
+ * @param Yend Ending Y coordinate.
+ * @param Color Color value.
+ * @param Line_width Line width (dot size).
+ * @param Line_Style Line style (solid/dotted).
+ */
 void Paint_DrawLine(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD Color, DOT_PIXEL Line_width, LINE_STYLE Line_Style);
+
+/**
+ * @brief Draw a rectangle.
+ * @param Xstart Starting X coordinate.
+ * @param Ystart Starting Y coordinate.
+ * @param Xend Ending X coordinate.
+ * @param Yend Ending Y coordinate.
+ * @param Color Color value.
+ * @param Line_width Line width (dot size).
+ * @param Draw_Fill Fill style (empty/full).
+ */
 void Paint_DrawRectangle(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend, UWORD Color, DOT_PIXEL Line_width, DRAW_FILL Draw_Fill);
+
+/**
+ * @brief Draw a circle.
+ * @param X_Center Center X coordinate.
+ * @param Y_Center Center Y coordinate.
+ * @param Radius Circle radius.
+ * @param Color Color value.
+ * @param Line_width Line width (dot size).
+ * @param Draw_Fill Fill style (empty/full).
+ */
 void Paint_DrawCircle(UWORD X_Center, UWORD Y_Center, UWORD Radius, UWORD Color, DOT_PIXEL Line_width, DRAW_FILL Draw_Fill);
 
-//Display string
+/**
+ * @brief Draw a single ASCII character.
+ * @param Xstart X coordinate.
+ * @param Ystart Y coordinate.
+ * @param Acsii_Char Character to draw.
+ * @param Font Pointer to font structure.
+ * @param Color_Foreground Foreground color.
+ * @param Color_Background Background color.
+ */
 void Paint_DrawChar(UWORD Xstart, UWORD Ystart, const char Acsii_Char, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
+
+/**
+ * @brief Draw an ASCII string.
+ * @param Xstart X coordinate.
+ * @param Ystart Y coordinate.
+ * @param pString Pointer to string.
+ * @param Font Pointer to font structure.
+ * @param Color_Foreground Foreground color.
+ * @param Color_Background Background color.
+ */
 void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
+
+/**
+ * @brief Draw a string with Chinese (GB2312) and ASCII characters.
+ * @param Xstart X coordinate.
+ * @param Ystart Y coordinate.
+ * @param pString Pointer to string.
+ * @param font Pointer to Chinese font structure.
+ * @param Color_Foreground Foreground color.
+ * @param Color_Background Background color.
+ */
 void Paint_DrawString_CN(UWORD Xstart, UWORD Ystart, const char * pString, cFONT* font, UWORD Color_Foreground, UWORD Color_Background);
+
+/**
+ * @brief Draw a number as a string.
+ * @param Xpoint X coordinate.
+ * @param Ypoint Y coordinate.
+ * @param Nummber Number to draw.
+ * @param Font Pointer to font structure.
+ * @param Color_Foreground Foreground color.
+ * @param Color_Background Background color.
+ */
 void Paint_DrawNum(UWORD Xpoint, UWORD Ypoint, int32_t Nummber, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
+
+/**
+ * @brief Draw a time value as a string.
+ * @param Xstart X coordinate.
+ * @param Ystart Y coordinate.
+ * @param pTime Pointer to time structure.
+ * @param Font Pointer to font structure.
+ * @param Color_Foreground Foreground color.
+ * @param Color_Background Background color.
+ */
 void Paint_DrawTime(UWORD Xstart, UWORD Ystart, PAINT_TIME *pTime, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
 
+/**
+ * @brief Set a 3x3 color block at the specified location (for color e-Paper).
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ * @param color Color value.
+ */
 void Paint_SetColor(UWORD x, UWORD y, UWORD color);
+
+/**
+ * @brief Get the 3x3 color block values for a given color (for color e-Paper).
+ * @param color Color value.
+ * @param arr_color Output array for color values.
+ */
 void Paint_GetColor(UWORD color, UBYTE* arr_color);
+
 #endif
 
 

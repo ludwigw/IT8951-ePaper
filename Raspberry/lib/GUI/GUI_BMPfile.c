@@ -1,39 +1,13 @@
-/*****************************************************************************
-* | File      	:   GUI_BMPfile.c
-* | Author      :   Waveshare team
-* | Function    :   Hardware underlying interface
-* | Info        :
-*                Used to shield the underlying layers of each master
-*                and enhance portability
-*----------------
-* |	This version:   V2.0
-* | Date        :   2018-11-12
-* | Info        :
-* 1.Change file name: GUI_BMP.c -> GUI_BMPfile.c
-* 2.fix: GUI_ReadBmp()
-*   Now Xstart and Xstart can control the position of the picture normally,
-*   and support the display of images of any size. If it is larger than
-*   the actual display range, it will not be displayed.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documnetation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to  whom the Software is
-# furished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-#
-******************************************************************************/
+/**
+ * @file GUI_BMPfile.c
+ * @brief Implementation of BMP image file loading and parsing for e-Paper displays.
+ *
+ * Provides functions for reading BMP files, parsing headers, and rendering images
+ * onto the e-Paper display buffer. Handles various bit depths and color palettes.
+ *
+ * @author Waveshare
+ * @date 2018-11-12
+ */
 
 #include "GUI_BMPfile.h"
 #include "GUI_Paint.h"
@@ -248,7 +222,19 @@ static void DrawMatrix(UWORD Xpos, UWORD Ypos,UWORD Width, UWORD High,const UBYT
 	}
 }
 
-UBYTE GUI_ReadBmp(const char *path, UWORD x, UWORD y)
+/**
+ * @brief Read and render a BMP file to the e-Paper display buffer.
+ *
+ * Opens the specified BMP file, parses its headers, and draws the image at the given
+ * (x, y) position on the display buffer. Supports images of any size; if the image
+ * exceeds the display area, it will be clipped.
+ *
+ * @param path Path to the BMP file.
+ * @param x X coordinate on the display to start drawing.
+ * @param y Y coordinate on the display to start drawing.
+ * @return 0 on success, negative value on error.
+ */
+int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 {
 	//bmp file pointer
 	FILE *fp;
