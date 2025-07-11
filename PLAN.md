@@ -1,19 +1,19 @@
 # Modernization and Portability Plan for IT8951-ePaper
 
-## Status (June 2024)
+## Status (December 2024)
 
-- **Directory structure:** Modernized; all code in `src/`, headers in `include/`, examples in `examples/`, tests in `tests/`.
-- **Documentation:** Doxygen and user docs complete and up to date.
-- **Testing:** Automated tests for all modules, including hardware abstraction, fonts, GUI, and e-Paper driver. Mocks for hardware present.
-- **Build system:**
-  - Fully modern Makefile at project root.
-  - Builds static library (`libit8951epd.a`) from all sources in `src/`.
-  - Builds all example binaries from `examples/`.
-  - Supports platform selection (`PLATFORM=BCM|LGPIO|GPIOD`).
-  - All object and dependency files are uniquely named and mapped, regardless of source directory.
-  - `make install` copies headers and library to `/usr/local`.
-  - Documentation and clean targets included.
-  - **Tested:** All build logic works as intended. The only build failures are due to missing system dependencies (e.g., `bcm2835.h` for BCM platform).
+- **Directory structure:** ✅ Modernized; all code in `src/`, headers in `include/`, examples in `examples/`, tests in `tests/`.
+- **Documentation:** ✅ Doxygen and user docs complete and up to date.
+- **Testing:** ✅ Automated tests for all modules, including hardware abstraction, fonts, GUI, and e-Paper driver. Mocks for hardware present.
+- **Build system:** ✅ Fully modern Makefile at project root.
+  - ✅ Builds static library (`libit8951epd.a`) from all sources in `src/`.
+  - ✅ Builds all example binaries from `examples/`.
+  - ✅ Supports platform selection (`PLATFORM=BCM|LGPIO|GPIOD`).
+  - ✅ All object and dependency files are uniquely named and mapped, regardless of source directory.
+  - ✅ `make install` copies headers and library to `/usr/local`.
+  - ✅ Documentation and clean targets included.
+  - ✅ **CI/CD:** GitHub Actions workflow with matrix builds for all platforms.
+  - ✅ **Tested:** All build logic works as intended. CI passes for all platforms.
 
 ## System Dependencies
 
@@ -21,14 +21,22 @@
 - **LGPIO platform:** Requires `lgpio` development headers.
 - **GPIOD platform:** Requires `gpiod` development headers.
 
-## Recent Progress
+## Recent Progress (December 2024)
 
-- All legacy files and the old `Raspberry/` tree have been removed from the repository.
-- All new/renamed files, tests, and documentation are tracked and committed.
-- The build system is robust, with unique object mapping and explicit rules.
-- The test suite and all examples are included and tracked.
-- `.DS_Store` and other unnecessary files are ignored.
-- The repository is clean and ready for push, release, or further development.
+- ✅ **CI/CD Pipeline:** GitHub Actions workflow with matrix builds for BCM, LGPIO, and GPIOD platforms.
+- ✅ **Platform Compatibility:** All three platforms now build and test successfully in CI.
+- ✅ **Build System Robustness:** Fixed duplicate object file warnings and improved platform separation.
+- ✅ **Code Quality:** Resolved all compiler warnings and platform-specific header conflicts.
+- ✅ **High-Level API:** Added `EPD_IT8951_DisplayBMP` function for one-call BMP image display.
+- ✅ **CLI Tool:** Enhanced `epdraw` command-line interface as the main entry point.
+- ✅ **Docker Support:** Added Dockerfile for Linux-based builds and testing.
+- ✅ **Documentation:** Updated Quick Start guide to recommend CLI tool usage.
+
+All legacy files and the old `Raspberry/` tree have been removed from the repository.
+All new/renamed files, tests, and documentation are tracked and committed.
+The build system is robust, with unique object mapping and explicit rules.
+The test suite and all examples are included and tracked.
+The repository is clean and ready for release or further development.
 
 ---
 
@@ -65,43 +73,43 @@
 ## 3. Build System
 - [x] Simplify the Makefile; provide clear targets for building library, examples, and cleaning
   - **Portability Tip:** Structure the build system so platform selection is easy (e.g., `make PLATFORM=ESP32`). Avoid hardcoding platform macros.
-- [ ] Add dependency checks and helpful error messages
+- [x] Add dependency checks and helpful error messages
 - [ ] Consider providing a CMake configuration for cross-platform builds
   - **Portability Tip:** CMake makes it easier to support multiple platforms and toolchains.
 
 ## 4. API Simplification
-- [ ] Abstract away low-level details for common use cases (e.g., `display_image(path, vcom, mode)`)
+- [x] Abstract away low-level details for common use cases (e.g., `display_image(path, vcom, mode)`)
   - **Portability Tip:** Keep the public API platform-agnostic; all platform-specific details should be hidden in the hardware abstraction layer.
-- [ ] Provide a simple, high-level API for image display
+- [x] Provide a simple, high-level API for image display
 - [x] Document all public functions with clear usage and parameter descriptions
 
 ## 5. User Experience Improvements
-- [ ] Add command-line help and argument validation to example programs
+- [x] Add command-line help and argument validation to example programs
 - [ ] Provide pre-built binaries for common platforms (optional)
   - **Portability Tip:** For MCUs, provide example firmware projects instead of binaries.
 - [x] Add scripts/utilities for image conversion and testing
-- [ ] Add error handling and user-friendly messages throughout
+- [x] Add error handling and user-friendly messages throughout
 
 ## 6. Testing & CI
 - [x] Add basic unit tests for core logic (where possible)
   - **Fonts module and text rendering are now fully covered by automated tests.**
   - **Platform abstraction, buffer logic, and e-Paper driver are tested.**
   - **Portability Tip:** Structure tests so platform-agnostic logic can be tested on any platform; hardware-specific tests should be isolated.
-- [ ] Set up continuous integration (CI) for build/test on supported platforms
+- [x] Set up continuous integration (CI) for build/test on supported platforms
   - **Portability Tip:** Consider using GitHub Actions or similar to test builds for all platforms.
 
 ## 7. Community & Contribution
 - [x] Add a `CONTRIBUTING.md` guide
-  - **Portability Tip:** Include a section: “How to add support for a new platform (e.g., ESP32)” with a checklist and pointers to the abstraction layer.
+  - **Portability Tip:** Include a section: "How to add support for a new platform (e.g., ESP32)" with a checklist and pointers to the abstraction layer.
 - [ ] Add issue templates and PR guidelines
 
 ---
 
-## Priorities
-1. Code organization and documentation
-2. API simplification and user experience
-3. Build system improvements
-4. Testing and community support
+## Remaining Priorities
+1. **Add more usage examples** - Drawing primitives, partial updates, text rendering
+2. **Consider CMake configuration** - For cross-platform builds
+3. **Add issue templates and PR guidelines** - For community contributions
+4. **Pre-built binaries** - For common platforms (optional)
 
 **Testing coverage and API documentation for all major modules (including Fonts) is complete. The codebase is now fully documented, tested, and ready for further development or release. This is a good milestone for a commit.**
 

@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y build-essential libbcm2835-dev make git && \
+    apt-get install -y build-essential libbcm2835-dev make git imagemagick && \
     rm -rf /var/lib/apt/lists/*
 
 # Set workdir

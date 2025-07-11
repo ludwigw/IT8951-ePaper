@@ -48,6 +48,15 @@ typedef struct IT8951_Dev_Info {
     UWORD LUT_Version[8]; /**< LUT version. */
 } IT8951_Dev_Info;
 
+typedef struct {
+    UBYTE bits_per_pixel;
+    UWORD rotate;
+    UBYTE mirror;
+    UBYTE is_color;
+} EPD_Config;
+
+EPD_Config EPD_IT8951_ComputeConfig(UWORD mode);
+
 /*-----------------------------------------------------------------------
 IT8951 Command defines
 ------------------------------------------------------------------------*/

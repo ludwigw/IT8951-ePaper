@@ -2,3 +2,7 @@ bin
 docs/api/html/
 docs/api/latex/
 docs/.DS_Store
+
+tests/test_*
+!tests/*.c
+!tests/*.h
