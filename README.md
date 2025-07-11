@@ -12,10 +12,10 @@ Display an image on your e-Paper display in 3 steps:
 
 ```sh
 make bin/epdraw           # Build the CLI tool
-./bin/epdraw image.bmp    # Display your image
+./bin/epdraw myphoto.jpg # Display your image (any format: PNG, JPG, BMP, etc.)
 ```
 
-The 'epdraw' CLI tool is the recommended way to use this library for image display.
+The 'epdraw' CLI tool is the recommended way to use this library for image display. You can pass any image file (PNG, JPG, BMP, etc.) and it will be automatically converted to the correct format for your e-Paper display using ImageMagick.
 
 See the [`/docs`](./docs) directory for detailed guides and troubleshooting.
 

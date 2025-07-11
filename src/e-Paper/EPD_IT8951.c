@@ -12,6 +12,12 @@
 #include "EPD_IT8951.h"
 #include <time.h>
 
+// External variables for display configuration
+extern UBYTE isColor;
+
+// Global variable for 4-byte alignment (default to false)
+bool Four_Byte_Align = false;
+
 //basic mode definition
 UBYTE INIT_Mode = 0;
 UBYTE GC16_Mode = 2;
@@ -905,15 +911,66 @@ void EPD_IT8951_8bp_Refresh(UBYTE *Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H
  * @brief High-level API: Display a BMP image file on the e-Paper display.
  *
  * Loads a BMP file, draws it to the display buffer, and refreshes the e-Paper display.
+ * Automatically configures rotation, mirroring, and bit depth based on the display mode.
  * Handles all buffer management and display logic internally.
  *
  * @param path Path to the BMP file.
  * @param VCOM VCOM voltage setting (pass 0 to use default).
- * @param Mode Display mode (e.g., INIT, GC16, A2).
+ * @param Mode Display mode (0-3) that determines rotation, mirroring, and color settings.
  * @return 0 on success, negative value on error.
  */
 #include "GUI_BMPfile.h"
 #include "GUI_Paint.h"
+
+/**
+ * @brief Compute the display configuration (bit depth, rotation, mirroring, color) for a given mode.
+ *
+ * Mode mapping (see docs/quickstart.md and examples):
+ *   0: No rotate, no mirror, grayscale
+ *   1: No rotate, horizontal mirror, grayscale (10.3")
+ *   2: No rotate, horizontal mirror, grayscale (5.2")
+ *   3: No rotate, no mirror, color (6" color)
+ *
+ * @param mode Display mode (0, 1, 2, 3)
+ * @return EPD_Config struct with fields set appropriately
+ */
+EPD_Config EPD_IT8951_ComputeConfig(UWORD mode) {
+    EPD_Config cfg;
+    // Default: 4bpp, no rotation, no mirror, grayscale
+    cfg.bits_per_pixel = 4;
+    cfg.rotate = 0;
+    cfg.mirror = 0;
+    cfg.is_color = 0;
+
+    switch (mode) {
+        case 3:
+            cfg.bits_per_pixel = 4; // 4bpp for color, but could be 8bpp if needed
+            cfg.rotate = 0;
+            cfg.mirror = 0;
+            cfg.is_color = 1;
+            break;
+        case 2:
+            cfg.bits_per_pixel = 4;
+            cfg.rotate = 0;
+            cfg.mirror = 1; // Horizontal mirror
+            cfg.is_color = 0;
+            break;
+        case 1:
+            cfg.bits_per_pixel = 4;
+            cfg.rotate = 0;
+            cfg.mirror = 1; // Horizontal mirror
+            cfg.is_color = 0;
+            break;
+        case 0:
+        default:
+            cfg.bits_per_pixel = 4;
+            cfg.rotate = 0;
+            cfg.mirror = 0;
+            cfg.is_color = 0;
+            break;
+    }
+    return cfg;
+}
 
 int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
     // 1. Initialize the display and get device info
@@ -922,26 +979,93 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         return -10; // Failed to init or get panel info
     }
 
-    // 2. Allocate a display buffer
-    UDOUBLE image_size = dev_info.Panel_W * dev_info.Panel_H;
+    EPD_Config cfg = EPD_IT8951_ComputeConfig(Mode);
+    Paint_SetRotate(cfg.rotate);
+    Paint_SetMirroring(cfg.mirror);
+    isColor = cfg.is_color;
+    UBYTE bits_per_pixel = cfg.bits_per_pixel;
+
+    // 3. Determine optimal bit depth based on mode and panel type
+    // UBYTE bits_per_pixel = 4; // Default to 4bpp (16 grayscale levels) - recommended
+    // bool use_packed_write = false;
+    
+    // For color mode (mode 3), use 8bpp for better color representation
+    // if (Mode == 3) {
+    //     bits_per_pixel = 8;
+    // }
+    // For A2 mode (fast black/white), use 1bpp
+    // else if (Mode == 4 || Mode == 6) { // A2 modes
+    //     bits_per_pixel = 1;
+    // }
+    // For INIT mode (clear display), use 1bpp
+    // else if (Mode == 0) { // INIT mode
+    //     bits_per_pixel = 1;
+    // }
+    // For GC16 mode (high quality), use 4bpp (default)
+
+    // 4. Calculate buffer size based on bit depth
+    UWORD width = dev_info.Panel_W;
+    UWORD height = dev_info.Panel_H;
+    
+    // Handle 4-byte alignment for certain displays
+    if (Four_Byte_Align) {
+        width = dev_info.Panel_W - (dev_info.Panel_W % 32);
+    }
+    
+    UDOUBLE image_size;
+    if (bits_per_pixel == 1) {
+        // 1bpp: 1 byte stores 8 pixels
+        image_size = ((width + 7) / 8) * height;
+    } else if (bits_per_pixel == 2) {
+        // 2bpp: 1 byte stores 4 pixels
+        image_size = ((width + 3) / 4) * height;
+    } else if (bits_per_pixel == 4) {
+        // 4bpp: 1 byte stores 2 pixels
+        image_size = ((width + 1) / 2) * height;
+    } else {
+        // 8bpp: 1 byte stores 1 pixel
+        image_size = width * height;
+    }
+
+    // 5. Allocate display buffer
     UBYTE *frame_buf = (UBYTE*)malloc(image_size);
     if (!frame_buf) {
         return -11; // Out of memory
     }
-    Paint_NewImage(frame_buf, dev_info.Panel_W, dev_info.Panel_H, ROTATE_0, WHITE);
+
+    // 6. Initialize paint context with correct bit depth
+    Paint_NewImage(frame_buf, width, height, ROTATE_0, WHITE);
+    Paint_SelectImage(frame_buf);
+    Paint_SetBitsPerPixel(bits_per_pixel);
     Paint_Clear(WHITE);
 
-    // 3. Load BMP file to buffer (draw at 0,0)
+    // 7. Load BMP file to buffer (draw at 0,0)
     int bmp_result = GUI_ReadBmp(path, 0, 0);
     if (bmp_result < 0) {
         free(frame_buf);
         return bmp_result; // Propagate error from BMP loader
     }
 
-    // 4. Refresh the display with the buffer
-    EPD_IT8951_4bp_Refresh(frame_buf, 0, 0, dev_info.Panel_W, dev_info.Panel_H, true, 0, false);
+    // 8. Refresh the display with the appropriate bit depth
+    switch (bits_per_pixel) {
+        case 1:
+            EPD_IT8951_1bp_Refresh(frame_buf, 0, 0, width, height, Mode, 0, false);
+            break;
+        case 2:
+            EPD_IT8951_2bp_Refresh(frame_buf, 0, 0, width, height, false, 0, false);
+            break;
+        case 4:
+            EPD_IT8951_4bp_Refresh(frame_buf, 0, 0, width, height, true, 0, false);
+            break;
+        case 8:
+            EPD_IT8951_8bp_Refresh(frame_buf, 0, 0, width, height, true, 0);
+            break;
+        default:
+            free(frame_buf);
+            return -12; // Invalid bit depth
+    }
 
-    // 5. Free buffer
+    // 9. Free buffer
     free(frame_buf);
     return 0;
 }

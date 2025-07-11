@@ -17,12 +17,12 @@ This guide will help you quickly get an image displayed on your WaveShare e-Pape
 ### 2. Build and Run
 ```sh
 make bin/epdraw           # Build the CLI tool
-./bin/epdraw image.bmp    # Display your image
+./bin/epdraw myphoto.jpg # Display your image (any format: PNG, JPG, BMP, etc.)
 ```
 
 ### 3. That's it! 
 
-The 'epdraw' CLI tool is the recommended way to use this library for image display.
+The 'epdraw' CLI tool is the recommended way to use this library for image display. You can pass any image file (PNG, JPG, BMP, etc.) and it will be automatically converted to the correct format for your e-Paper display using ImageMagick.
 
 **Optional parameters:**
 ```sh
@@ -33,13 +33,7 @@ The 'epdraw' CLI tool is the recommended way to use this library for image displ
 
 ## Image Preparation
 
-Convert your image to a compatible BMP format:
-
-```sh
-cd pic
-./convert_to_eink.sh your_image.png
-# This creates your_image.bmp
-```
+You do not need to manually convert your image. The CLI will automatically convert any image (PNG, JPG, etc.) to the correct BMP format for your e-Paper display using ImageMagick. Just pass your image file directly to the CLI.
 
 **Display modes:**
 - `0`: No rotate, no mirroring (default)

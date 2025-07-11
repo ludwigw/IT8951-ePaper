@@ -76,6 +76,9 @@ test_EPD_IT8951_DisplayBMP: test_EPD_IT8951_DisplayBMP.c ../src/e-Paper/EPD_IT89
 test_cli: test_cli.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
+test_config_logic: test_config_logic.c ../src/e-Paper/EPD_IT8951.c
+	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
+
 run: all
 	@for t in $(TESTS); do \
 		echo "Running $$t..."; \
