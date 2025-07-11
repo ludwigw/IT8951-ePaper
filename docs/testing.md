@@ -1,5 +1,7 @@
 # Testing Plan
 
+> **Note:** In CI (GitHub Actions), the test matrix builds and runs all platform-agnostic tests for each supported platform (BCM, LGPIO, GPIOD). Platform-specific tests (which require real hardware) are skipped or print a message in CI. To fully test hardware abstraction, run platform-specific tests manually on a real device.
+
 This document outlines the testing strategy for the IT8951-ePaper library.
 
 ## Current Test Coverage
@@ -36,6 +38,18 @@ The library includes comprehensive unit tests in the `tests/` directory:
 - `mock_DEV_Config.c` - Hardware abstraction layer mocks
 - `bcm2835.h` - Mock headers for testing
 
+## What is and isn't tested in CI
+
+- **What is tested:**
+  - All platform-agnostic logic (GUI, BMP parsing, buffer management, CLI, high-level API)
+  - Build and test for all supported platforms (BCM, LGPIO, GPIOD) using the correct dev libraries
+  - Ensures the codebase compiles and links for each platform
+
+- **What is NOT tested:**
+  - Actual hardware access (GPIO, SPI) for any platform
+  - Platform-specific tests that require real hardware (these are skipped or print a message)
+  - Full integration with a real e-Paper display (manual testing required)
+
 ## Running Tests
 
 ### Local Testing
@@ -61,53 +75,10 @@ Tests use mock implementations to avoid requiring actual hardware:
 ### Recommended CI/CD Setup
 
 #### 1. GitHub Actions
-Create `.github/workflows/test.yml`:
-
-```yaml
-name: Tests
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libbcm2835-dev
-    
-    - name: Build library
-      run: make PLATFORM=BCM
-    
-    - name: Run tests
-      run: make test
-    
-    - name: Build CLI tool
-      run: make bin/epdraw PLATFORM=BCM
-```
+The workflow uses a matrix to build and test for all supported platforms (BCM, LGPIO, GPIOD). Only platform-agnostic tests are run in CI.
 
 #### 2. Docker Testing
-Create `Dockerfile.test`:
-
-```dockerfile
-FROM ubuntu:22.04
-
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libbcm2835-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-COPY . .
-
-RUN make PLATFORM=BCM
-RUN make test
-RUN make bin/epdraw PLATFORM=BCM
-```
+You can also use Docker locally to test the build and run the platform-agnostic tests.
 
 ### Multi-Platform Testing
 
@@ -171,7 +142,7 @@ Located in `tests/assets/`:
 - **Unit Tests:** >90% line coverage
 - **Integration Tests:** All major use cases
 - **Error Handling:** All error paths tested
-- **Platform Support:** All platforms tested
+- **Platform Support:** All platforms tested (build and logic only in CI)
 
 ### Performance Testing
 - Memory usage profiling
