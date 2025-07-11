@@ -37,6 +37,8 @@ $(error Unknown PLATFORM: $(PLATFORM))
 endif
 
 # Helper to flatten paths for unique object names
+# This ensures that each object file name is unique, even if source files have the same name in different directories.
+# It is critical that only one platform-specific DEV_Config source is included in SRC at a time, or duplicate object file rules will result.
 define FLATTEN
 $(subst /,_,$(subst src/,,$(subst examples/,,$(1:.c=))))
 endef
@@ -119,3 +121,12 @@ bin/epdraw: src/epdraw.c $(LIB_NAME)
 # Run tests
 test:
 	$(MAKE) -C tests 
+
+# Check for duplicate object file names (warn if any duplicates are found)
+# This is a Makefile hack: it prints a warning if any object file names are duplicated in OBJ
+check-duplicates:
+	@dups=`echo $(OBJ) | tr ' ' '\n' | sort | uniq -d`; \
+	if [ "$$dups" ]; then \
+	  echo "WARNING: Duplicate object file names detected:"; \
+	  echo "$$dups"; \
+	fi 

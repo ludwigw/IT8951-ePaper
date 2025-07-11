@@ -22,13 +22,13 @@
 #include <string.h>
 #include "Debug.h"
 
-#ifdef BCM
+#if defined(BCM) && (BCM)
     #include <bcm2835.h>
-#elif LGPIO
+#elif defined(LGPIO) && (LGPIO)
     #include <lgpio.h>
     #define LFLAGS 0
     #define NUM_MAXBUF  4
-#elif GPIOD
+#elif defined(GPIOD) && (GPIOD)
     #include "RPI_gpiod.h"
     #include "dev_hardware_SPI.h"
 #endif
