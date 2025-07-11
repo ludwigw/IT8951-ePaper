@@ -48,12 +48,25 @@ HARDWARE_SPI hardware_SPI;
 
 static uint8_t bits = 8; 
 
+// Define SPI macros only if not already defined by Linux kernel headers
+#ifndef SPI_CS_HIGH
 #define SPI_CS_HIGH     0x04                //Chip select high  
+#endif
+#ifndef SPI_LSB_FIRST
 #define SPI_LSB_FIRST   0x08                //LSB  
+#endif
+#ifndef SPI_3WIRE
 #define SPI_3WIRE       0x10                //3-wire mode SI and SO same line
+#endif
+#ifndef SPI_LOOP
 #define SPI_LOOP        0x20                //Loopback mode  
+#endif
+#ifndef SPI_NO_CS
 #define SPI_NO_CS       0x40                //A single device occupies one SPI bus, so there is no chip select 
+#endif
+#ifndef SPI_READY
 #define SPI_READY       0x80                //Slave pull low to stop data transmission  
+#endif
 
 struct spi_ioc_transfer tr;
 
@@ -114,12 +127,14 @@ void DEV_HARDWARE_SPI_beginSet(char *SPI_device, SPIMode mode, uint32_t speed)
     }
     
     ret = ioctl(hardware_SPI.fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
-    if (ret == -1) 
+    if (ret == -1) {
         DEV_HARDWARE_SPI_Debug("can't set bits per word\r\n"); 
+    }
  
     ret = ioctl(hardware_SPI.fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
-    if (ret == -1) 
+    if (ret == -1) {
         DEV_HARDWARE_SPI_Debug("can't get bits per word\r\n"); 
+    }
 
     DEV_HARDWARE_SPI_Mode(mode);
     DEV_HARDWARE_SPI_ChipSelect(SPI_CS_Mode_LOW);
@@ -339,8 +354,9 @@ uint8_t DEV_HARDWARE_SPI_TransferByte(uint8_t buf)
     tr.rx_buf =  (unsigned long)rbuf;
     
     //ioctl Operation, transmission of data
-    if ( ioctl(hardware_SPI.fd, SPI_IOC_MESSAGE(1), &tr) < 1 )  
+    if ( ioctl(hardware_SPI.fd, SPI_IOC_MESSAGE(1), &tr) < 1 ) {
         DEV_HARDWARE_SPI_Debug("can't send spi message\r\n"); 
+    }
     return rbuf[0];
 }
 

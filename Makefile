@@ -4,7 +4,8 @@
 PLATFORM ?= BCM
 
 # Directories
-SRC_DIRS = src/GUI src/e-Paper src/Fonts src/Config src/platform
+SRC_DIRS = src/GUI src/e-Paper src/Fonts src/Config
+PLATFORM_DIR = src/platform
 EXAMPLES_DIR = examples
 BIN_DIR = bin
 INCLUDE_DIR = include
@@ -12,7 +13,7 @@ INCLUDE_DIR = include
 # Compiler and flags
 CC = gcc
 AR = ar
-CFLAGS = -I$(INCLUDE_DIR) $(foreach d,$(SRC_DIRS),-I$d) -Wall -Wextra -g
+CFLAGS = -I$(INCLUDE_DIR) $(foreach d,$(SRC_DIRS),-I$d) -I$(PLATFORM_DIR) -Wall -Wextra -g
 LDFLAGS =
 
 # Platform-specific sources

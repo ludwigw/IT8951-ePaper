@@ -6,8 +6,8 @@
  * using the GPIOD and custom SPI libraries.
  */
 #include "../../include/DEV_Config.h"
-#include "../../Raspberry/lib/Config/RPI_gpiod.h"
-#include "../../Raspberry/lib/Config/dev_hardware_SPI.h"
+#include "../../include/RPI_gpiod.h"
+#include "../../include/dev_hardware_SPI.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
