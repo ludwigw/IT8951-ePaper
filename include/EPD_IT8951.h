@@ -235,4 +235,17 @@ void EPD_IT8951_4bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H
  */
 void EPD_IT8951_8bp_Refresh(UBYTE *Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, bool Hold, UDOUBLE Target_Memory_Addr);
 
+/**
+ * @brief High-level API: Display a BMP image file on the e-Paper display.
+ *
+ * Loads a BMP file, draws it to the display buffer, and refreshes the e-Paper display.
+ * Handles all buffer management and display logic internally.
+ *
+ * @param path Path to the BMP file.
+ * @param VCOM VCOM voltage setting (pass 0 to use default).
+ * @param Mode Display mode (e.g., INIT, GC16, A2).
+ * @return 0 on success, negative value on error.
+ */
+int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode);
+
 #endif

@@ -266,9 +266,10 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 		return(-3);
 	}
 	
-	Debug("*****************************************\n");
-	Debug("BMP_bSize:%d \n", FileHead.bSize);
- 	Debug("BMP_bOffset:%d \n", FileHead.bOffset);
+	// Comment out BMP info Debug prints, keep error Debug prints
+	// Debug("*****************************************\n");
+	// Debug("BMP_bSize:%d \n", FileHead.bSize);
+ 	// Debug("BMP_bOffset:%d \n", FileHead.bOffset);
 	
 	ret = fread((char *)&InfoHead, sizeof(BMPINFOHEADER),1, fp);
 	if (ret != 1)
@@ -278,29 +279,29 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 		return(-4);
 	}
 	
-	Debug("BMP_biInfoSize:%d \n", InfoHead.biInfoSize);
- 	Debug("BMP_biWidth:%d \n", InfoHead.biWidth);
-	Debug("BMP_biHeight:%d \n", InfoHead.biHeight);
-	Debug("BMP_biPlanes:%d \n", InfoHead.biPlanes);
-	Debug("BMP_biBitCount:%d \n", InfoHead.biBitCount);
-	Debug("BMP_biCompression:%d \n", InfoHead.biCompression);
-	Debug("BMP_bimpImageSize:%d \n", InfoHead.bimpImageSize);
-	Debug("BMP_biXPelsPerMeter:%d \n", InfoHead.biXPelsPerMeter);
-	Debug("BMP_biYPelsPerMeter:%d \n", InfoHead.biYPelsPerMeter);
-	Debug("BMP_biClrUsed:%d \n", InfoHead.biClrUsed);
-	Debug("BMP_biClrImportant:%d \n", InfoHead.biClrImportant);
+	// Debug("BMP_biInfoSize:%d \n", InfoHead.biInfoSize);
+ 	// Debug("BMP_biWidth:%d \n", InfoHead.biWidth);
+	// Debug("BMP_biHeight:%d \n", InfoHead.biHeight);
+	// Debug("BMP_biPlanes:%d \n", InfoHead.biPlanes);
+	// Debug("BMP_biBitCount:%d \n", InfoHead.biBitCount);
+	// Debug("BMP_biCompression:%d \n", InfoHead.biCompression);
+	// Debug("BMP_bimpImageSize:%d \n", InfoHead.bimpImageSize);
+	// Debug("BMP_biXPelsPerMeter:%d \n", InfoHead.biXPelsPerMeter);
+	// Debug("BMP_biYPelsPerMeter:%d \n", InfoHead.biYPelsPerMeter);
+	// Debug("BMP_biClrUsed:%d \n", InfoHead.biClrUsed);
+	// Debug("BMP_biClrImportant:%d \n", InfoHead.biClrImportant);
 	
 	total_length = FileHead.bSize-FileHead.bOffset;
 	bytesPerLine=((InfoHead.biWidth*InfoHead.biBitCount+31)>>5)<<2;
 	imageSize=bytesPerLine*InfoHead.biHeight;
 	skip=(4-((InfoHead.biWidth*InfoHead.biBitCount)>>3))&3;
 	
-	Debug("bimpImageSize:%d\n", InfoHead.bimpImageSize);
-	Debug("total_length:%d\n", total_length);
-	Debug("bytesPerLine = %d\n", bytesPerLine);
-	Debug("imageSize = %d\n", imageSize);
-	Debug("skip = %d\n", skip);
-	Debug("*****************************************\n");
+	// Debug("bimpImageSize:%d\n", InfoHead.bimpImageSize);
+	// Debug("total_length:%d\n", total_length);
+	// Debug("bytesPerLine = %d\n", bytesPerLine);
+	// Debug("imageSize = %d\n", imageSize);
+	// Debug("skip = %d\n", skip);
+	// Debug("*****************************************\n");
 	
     bmp_width = InfoHead.biWidth;
     bmp_height = InfoHead.biHeight;

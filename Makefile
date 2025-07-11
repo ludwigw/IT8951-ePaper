@@ -43,6 +43,18 @@ endef
 
 # Source and object files
 SRC = $(foreach d,$(SRC_DIRS),$(wildcard $d/*.c)) $(PLATFORM_SRC)
+# Exclude the generic DEV_Config.c file, we only want platform-specific ones
+SRC := $(filter-out src/Config/DEV_Config.c,$(SRC))
+# Exclude platform-specific files from src/Config and src/platform based on platform
+ifeq ($(PLATFORM),BCM)
+SRC := $(filter-out src/Config/RPI_gpiod.c src/Config/dev_hardware_SPI.c,$(SRC))
+SRC := $(filter-out src/platform/DEV_Config_LGPIO.c src/platform/DEV_Config_GPIOD.c,$(SRC))
+else ifeq ($(PLATFORM),LGPIO)
+SRC := $(filter-out src/Config/RPI_gpiod.c src/Config/dev_hardware_SPI.c,$(SRC))
+SRC := $(filter-out src/platform/DEV_Config_BCM.c src/platform/DEV_Config_GPIOD.c,$(SRC))
+else ifeq ($(PLATFORM),GPIOD)
+SRC := $(filter-out src/platform/DEV_Config_BCM.c src/platform/DEV_Config_LGPIO.c,$(SRC))
+endif
 OBJ = $(foreach f,$(SRC),$(BIN_DIR)/$(call FLATTEN,$(f)).o)
 OBJ_SRC = $(foreach f,$(SRC),$(BIN_DIR)/$(call FLATTEN,$(f)).o:$(f))
 DEPS = $(OBJ:.o=.d)
@@ -55,7 +67,7 @@ EXAMPLE_OBJ_SRC = $(foreach f,$(EXAMPLE_SRC),$(BIN_DIR)/$(call FLATTEN,$(f)).o:$
 
 LIB_NAME = libit8951epd.a
 
-.PHONY: all clean apidocs docs-clean install $(EXAMPLE_BINS)
+.PHONY: all clean apidocs docs-clean install test $(EXAMPLE_BINS)
 
 all: $(BIN_DIR) $(LIB_NAME) $(EXAMPLE_BINS)
 
@@ -85,11 +97,13 @@ $(foreach rule,$(EXAMPLE_OBJ_SRC),$(eval $(call OBJ_template,$(word 1,$(subst :,
 clean:
 	rm -rf $(BIN_DIR) *.a $(EXAMPLE_BINS)
 
-# Install headers and static library
-install: $(LIB_NAME)
+# Install headers, static library, and CLI tool
+install: $(LIB_NAME) bin/epdraw
 	install -d /usr/local/include/it8951epd
 	install -m 644 $(INCLUDE_DIR)/*.h /usr/local/include/it8951epd/
 	install -m 644 $(LIB_NAME) /usr/local/lib/
+	install -d /usr/local/bin
+	install -m 755 bin/epdraw /usr/local/bin/
 
 # Documentation targets (retained from previous Makefile)
 apidocs:
@@ -97,3 +111,11 @@ apidocs:
 
 docs-clean:
 	rm -rf docs/api 
+
+# CLI tool for end users
+bin/epdraw: src/epdraw.c $(LIB_NAME)
+	$(CC) $(CFLAGS) $(PLATFORM_DEFS) -o $@ $< -L. -lit8951epd $(PLATFORM_LIBS) -lm
+
+# Run tests
+test:
+	$(MAKE) -C tests 

@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     test_EPD_IT8951_error
-relocations:     []
-...

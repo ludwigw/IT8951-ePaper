@@ -3,7 +3,7 @@
 #include "../include/GUI_BMPfile.h"
 
 void test_valid_bmp() {
-    int result = GUI_ReadBmp("../Raspberry/pic/render.bmp", 0, 0);
+    int result = GUI_ReadBmp("assets/test.bmp", 0, 0);
     assert(result == 0);
 }
 
