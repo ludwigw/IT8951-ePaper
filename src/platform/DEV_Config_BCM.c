@@ -169,8 +169,16 @@ UBYTE DEV_Module_Init(void) {
     }
     
     printf("DEV_Module_Init: Setting SPI clock divider to 32\n");
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
-    printf("DEV_Module_Init: SPI clock divider set successfully\n");
+    printf("DEV_Module_Init: About to call bcm2835_spi_setClockDivider...\n");
+    
+    // Check if we should skip SPI clock divider setting (workaround for some Pi configurations)
+    const char* skip_spi_clock = getenv("SKIP_SPI_CLOCK");
+    if (skip_spi_clock && strcmp(skip_spi_clock, "1") == 0) {
+        printf("DEV_Module_Init: SKIP_SPI_CLOCK=1, skipping SPI clock divider setting\n");
+    } else {
+        bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
+        printf("DEV_Module_Init: SPI clock divider set successfully\n");
+    }
     printf("DEV_Module_Init: SPI configuration completed\n");
     printf("DEV_Module_Init: Initializing GPIO pins\n");
     DEV_GPIO_Init();
