@@ -188,6 +188,13 @@ int main(int argc, char *argv[])
     }
     fclose(fp);
     
+    printf("epdraw: Initializing hardware (GPIO, SPI)...\n");
+    if (DEV_Module_Init() != 0) {
+        fprintf(stderr, "epdraw: ERROR: Failed to initialize hardware\n");
+        return 2;
+    }
+    printf("epdraw: Hardware initialization completed\n");
+    
     printf("epdraw: Displaying BMP: %s, VCOM: %d, mode: %d\n", bmp_path, vcom, mode);
     int result = EPD_IT8951_DisplayBMP(bmp_path, vcom, mode);
     if (result == 0) {
@@ -210,6 +217,10 @@ int main(int argc, char *argv[])
         else if (result == -5) fprintf(stderr, "epdraw: ERROR: BMP palette read error or out of memory\n");
         // Add more as needed
     }
+    
+    printf("epdraw: Cleaning up hardware resources...\n");
+    DEV_Module_Exit();
+    printf("epdraw: Hardware cleanup completed\n");
     
     return result;
 } 

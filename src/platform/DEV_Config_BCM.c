@@ -76,10 +76,15 @@ static void DEV_GPIO_Mode(UWORD Pin, UWORD Mode) {
  * @brief Initialize all required GPIO pins for the e-Paper display.
  */
 static void DEV_GPIO_Init(void) {
+    printf("DEV_GPIO_Init: Configuring RST_PIN (%d) as output\n", EPD_RST_PIN);
     DEV_GPIO_Mode(EPD_RST_PIN, BCM2835_GPIO_FSEL_OUTP);
+    printf("DEV_GPIO_Init: Configuring CS_PIN (%d) as output\n", EPD_CS_PIN);
     DEV_GPIO_Mode(EPD_CS_PIN, BCM2835_GPIO_FSEL_OUTP);
+    printf("DEV_GPIO_Init: Configuring BUSY_PIN (%d) as input\n", EPD_BUSY_PIN);
     DEV_GPIO_Mode(EPD_BUSY_PIN, BCM2835_GPIO_FSEL_INPT);
+    printf("DEV_GPIO_Init: Setting CS_PIN HIGH\n");
     DEV_Digital_Write(EPD_CS_PIN, HIGH);
+    printf("DEV_GPIO_Init: GPIO pin configuration completed\n");
 }
 
 /**
@@ -87,18 +92,31 @@ static void DEV_GPIO_Init(void) {
  * @return 0 on success, nonzero on failure.
  */
 UBYTE DEV_Module_Init(void) {
+    printf("DEV_Module_Init: Starting BCM2835 initialization\n");
     Debug("/***********************************/ \r\n");
+    printf("DEV_Module_Init: Calling bcm2835_init()\n");
     if(!bcm2835_init()) {
+        printf("DEV_Module_Init: ERROR - bcm2835_init() failed!\n");
         Debug("bcm2835 init failed  !!! \r\n");
         return 1;
     } else {
+        printf("DEV_Module_Init: bcm2835_init() succeeded\n");
         Debug("bcm2835 init success !!! \r\n");
     }
+    printf("DEV_Module_Init: Starting SPI configuration\n");
+    printf("DEV_Module_Init: Calling bcm2835_spi_begin()\n");
     bcm2835_spi_begin();
+    printf("DEV_Module_Init: Setting SPI bit order to MSBFIRST\n");
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    printf("DEV_Module_Init: Setting SPI data mode to MODE0\n");
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+    printf("DEV_Module_Init: Setting SPI clock divider to 32\n");
     bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
+    printf("DEV_Module_Init: SPI configuration completed\n");
+    printf("DEV_Module_Init: Initializing GPIO pins\n");
     DEV_GPIO_Init();
+    printf("DEV_Module_Init: GPIO initialization completed\n");
+    printf("DEV_Module_Init: BCM2835 initialization completed successfully\n");
     Debug("/***********************************/ \r\n");
     return 0;
 }
