@@ -15,7 +15,9 @@
  * @param Value HIGH or LOW.
  */
 void DEV_Digital_Write(UWORD Pin, UBYTE Value) {
+    printf("DEV_Digital_Write: Setting pin %d to value %d\n", Pin, Value);
     bcm2835_gpio_write(Pin, Value);
+    printf("DEV_Digital_Write: Pin %d set to %d successfully\n", Pin, Value);
 }
 
 /**
@@ -65,25 +67,34 @@ void DEV_Delay_us(UDOUBLE xus) {
  * @param Mode 0 or BCM2835_GPIO_FSEL_INPT for input, otherwise output.
  */
 static void DEV_GPIO_Mode(UWORD Pin, UWORD Mode) {
+    printf("DEV_GPIO_Mode: Setting pin %d to mode %d\n", Pin, Mode);
     if(Mode == 0 || Mode == BCM2835_GPIO_FSEL_INPT) {
+        printf("DEV_GPIO_Mode: Configuring pin %d as input\n", Pin);
         bcm2835_gpio_fsel(Pin, BCM2835_GPIO_FSEL_INPT);
     } else {
+        printf("DEV_GPIO_Mode: Configuring pin %d as output\n", Pin);
         bcm2835_gpio_fsel(Pin, BCM2835_GPIO_FSEL_OUTP);
     }
+    printf("DEV_GPIO_Mode: Pin %d configuration completed\n", Pin);
 }
 
 /**
  * @brief Initialize all required GPIO pins for the e-Paper display.
  */
 static void DEV_GPIO_Init(void) {
+    printf("DEV_GPIO_Init: Starting GPIO pin configuration\n");
     printf("DEV_GPIO_Init: Configuring RST_PIN (%d) as output\n", EPD_RST_PIN);
     DEV_GPIO_Mode(EPD_RST_PIN, BCM2835_GPIO_FSEL_OUTP);
+    printf("DEV_GPIO_Init: RST_PIN configured successfully\n");
     printf("DEV_GPIO_Init: Configuring CS_PIN (%d) as output\n", EPD_CS_PIN);
     DEV_GPIO_Mode(EPD_CS_PIN, BCM2835_GPIO_FSEL_OUTP);
+    printf("DEV_GPIO_Init: CS_PIN configured successfully\n");
     printf("DEV_GPIO_Init: Configuring BUSY_PIN (%d) as input\n", EPD_BUSY_PIN);
     DEV_GPIO_Mode(EPD_BUSY_PIN, BCM2835_GPIO_FSEL_INPT);
+    printf("DEV_GPIO_Init: BUSY_PIN configured successfully\n");
     printf("DEV_GPIO_Init: Setting CS_PIN HIGH\n");
     DEV_Digital_Write(EPD_CS_PIN, HIGH);
+    printf("DEV_GPIO_Init: CS_PIN set HIGH successfully\n");
     printf("DEV_GPIO_Init: GPIO pin configuration completed\n");
 }
 
@@ -106,12 +117,16 @@ UBYTE DEV_Module_Init(void) {
     printf("DEV_Module_Init: Starting SPI configuration\n");
     printf("DEV_Module_Init: Calling bcm2835_spi_begin()\n");
     bcm2835_spi_begin();
+    printf("DEV_Module_Init: bcm2835_spi_begin() completed\n");
     printf("DEV_Module_Init: Setting SPI bit order to MSBFIRST\n");
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    printf("DEV_Module_Init: SPI bit order set successfully\n");
     printf("DEV_Module_Init: Setting SPI data mode to MODE0\n");
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+    printf("DEV_Module_Init: SPI data mode set successfully\n");
     printf("DEV_Module_Init: Setting SPI clock divider to 32\n");
     bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
+    printf("DEV_Module_Init: SPI clock divider set successfully\n");
     printf("DEV_Module_Init: SPI configuration completed\n");
     printf("DEV_Module_Init: Initializing GPIO pins\n");
     DEV_GPIO_Init();
