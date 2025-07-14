@@ -8,6 +8,8 @@
 #include "../../include/DEV_Config.h"
 #include <bcm2835.h>
 #include <fcntl.h>
+#include <errno.h> // Added for errno
+#include <stdlib.h> // Added for getenv
 
 /**
  * @brief Write a digital value to a GPIO pin.
@@ -104,6 +106,27 @@ static void DEV_GPIO_Init(void) {
  */
 UBYTE DEV_Module_Init(void) {
     printf("DEV_Module_Init: Starting BCM2835 initialization\n");
+    
+    // Check if we can access GPIO memory
+    printf("DEV_Module_Init: Checking GPIO memory access...\n");
+    FILE *gpio_mem = fopen("/dev/gpiomem", "r");
+    if (gpio_mem) {
+        printf("DEV_Module_Init: /dev/gpiomem is accessible\n");
+        fclose(gpio_mem);
+    } else {
+        printf("DEV_Module_Init: WARNING - /dev/gpiomem not accessible (errno: %d)\n", errno);
+    }
+    
+    // Check if we can access SPI device
+    printf("DEV_Module_Init: Checking SPI device access...\n");
+    FILE *spi_dev = fopen("/dev/spidev0.0", "r");
+    if (spi_dev) {
+        printf("DEV_Module_Init: /dev/spidev0.0 is accessible\n");
+        fclose(spi_dev);
+    } else {
+        printf("DEV_Module_Init: WARNING - /dev/spidev0.0 not accessible (errno: %d)\n", errno);
+    }
+    
     Debug("/***********************************/ \r\n");
     printf("DEV_Module_Init: Calling bcm2835_init()\n");
     if(!bcm2835_init()) {
@@ -114,6 +137,10 @@ UBYTE DEV_Module_Init(void) {
         printf("DEV_Module_Init: bcm2835_init() succeeded\n");
         Debug("bcm2835 init success !!! \r\n");
     }
+    
+    // Check bcm2835 library version
+    printf("DEV_Module_Init: bcm2835 library version: %u\n", bcm2835_version());
+    
     printf("DEV_Module_Init: Starting SPI configuration\n");
     printf("DEV_Module_Init: Calling bcm2835_spi_begin()\n");
     bcm2835_spi_begin();
@@ -122,8 +149,25 @@ UBYTE DEV_Module_Init(void) {
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
     printf("DEV_Module_Init: SPI bit order set successfully\n");
     printf("DEV_Module_Init: Setting SPI data mode to MODE0\n");
-    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
-    printf("DEV_Module_Init: SPI data mode set successfully\n");
+    printf("DEV_Module_Init: About to call bcm2835_spi_setDataMode(BCM2835_SPI_MODE0)\n");
+    printf("DEV_Module_Init: BCM2835_SPI_MODE0 value = %d\n", BCM2835_SPI_MODE0);
+    
+    // Try to catch any potential issues with the SPI mode setting
+    printf("DEV_Module_Init: Attempting SPI data mode configuration...\n");
+    
+    // Check if we should skip SPI mode setting (workaround for some Pi configurations)
+    printf("DEV_Module_Init: About to check SKIP_SPI_MODE environment variable...\n");
+    const char* skip_spi_mode = getenv("SKIP_SPI_MODE");
+    printf("DEV_Module_Init: getenv(\"SKIP_SPI_MODE\") returned: %s\n", skip_spi_mode ? skip_spi_mode : "NULL");
+    
+    if (skip_spi_mode && strcmp(skip_spi_mode, "1") == 0) {
+        printf("DEV_Module_Init: SKIP_SPI_MODE=1, skipping SPI data mode setting\n");
+    } else {
+        printf("DEV_Module_Init: About to call bcm2835_spi_setDataMode(BCM2835_SPI_MODE0)...\n");
+        bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+        printf("DEV_Module_Init: SPI data mode set successfully\n");
+    }
+    
     printf("DEV_Module_Init: Setting SPI clock divider to 32\n");
     bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
     printf("DEV_Module_Init: SPI clock divider set successfully\n");
