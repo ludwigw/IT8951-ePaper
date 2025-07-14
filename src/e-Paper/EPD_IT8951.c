@@ -973,80 +973,51 @@ EPD_Config EPD_IT8951_ComputeConfig(UWORD mode) {
 }
 
 int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
+    printf("EPD_IT8951_DisplayBMP: path=%s, VCOM=%d, Mode=%d\n", path, VCOM, Mode);
     // 1. Initialize the display and get device info
     IT8951_Dev_Info dev_info = EPD_IT8951_Init(VCOM);
     if (dev_info.Panel_W == 0 || dev_info.Panel_H == 0) {
+        fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Failed to initialize display or get panel info\n");
         return -10; // Failed to init or get panel info
     }
-
+    printf("EPD_IT8951_DisplayBMP: Initialized display, panel size: %dx%d\n", dev_info.Panel_W, dev_info.Panel_H);
     EPD_Config cfg = EPD_IT8951_ComputeConfig(Mode);
     Paint_SetRotate(cfg.rotate);
     Paint_SetMirroring(cfg.mirror);
     isColor = cfg.is_color;
     UBYTE bits_per_pixel = cfg.bits_per_pixel;
-
-    // 3. Determine optimal bit depth based on mode and panel type
-    // UBYTE bits_per_pixel = 4; // Default to 4bpp (16 grayscale levels) - recommended
-    // bool use_packed_write = false;
-    
-    // For color mode (mode 3), use 8bpp for better color representation
-    // if (Mode == 3) {
-    //     bits_per_pixel = 8;
-    // }
-    // For A2 mode (fast black/white), use 1bpp
-    // else if (Mode == 4 || Mode == 6) { // A2 modes
-    //     bits_per_pixel = 1;
-    // }
-    // For INIT mode (clear display), use 1bpp
-    // else if (Mode == 0) { // INIT mode
-    //     bits_per_pixel = 1;
-    // }
-    // For GC16 mode (high quality), use 4bpp (default)
-
-    // 4. Calculate buffer size based on bit depth
     UWORD width = dev_info.Panel_W;
     UWORD height = dev_info.Panel_H;
-    
-    // Handle 4-byte alignment for certain displays
     if (Four_Byte_Align) {
         width = dev_info.Panel_W - (dev_info.Panel_W % 32);
     }
-    
     UDOUBLE image_size;
     if (bits_per_pixel == 1) {
-        // 1bpp: 1 byte stores 8 pixels
         image_size = ((width + 7) / 8) * height;
     } else if (bits_per_pixel == 2) {
-        // 2bpp: 1 byte stores 4 pixels
         image_size = ((width + 3) / 4) * height;
     } else if (bits_per_pixel == 4) {
-        // 4bpp: 1 byte stores 2 pixels
         image_size = ((width + 1) / 2) * height;
     } else {
-        // 8bpp: 1 byte stores 1 pixel
         image_size = width * height;
     }
-
-    // 5. Allocate display buffer
+    printf("EPD_IT8951_DisplayBMP: Allocating frame buffer of size %llu\n", image_size);
     UBYTE *frame_buf = (UBYTE*)malloc(image_size);
     if (!frame_buf) {
+        fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Out of memory allocating display buffer\n");
         return -11; // Out of memory
     }
-
-    // 6. Initialize paint context with correct bit depth
     Paint_NewImage(frame_buf, width, height, ROTATE_0, WHITE);
     Paint_SelectImage(frame_buf);
     Paint_SetBitsPerPixel(bits_per_pixel);
     Paint_Clear(WHITE);
-
-    // 7. Load BMP file to buffer (draw at 0,0)
     int bmp_result = GUI_ReadBmp(path, 0, 0);
+    printf("EPD_IT8951_DisplayBMP: Loaded BMP file, result=%d\n", bmp_result);
     if (bmp_result < 0) {
+        fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Failed to load BMP file (error %d)\n", bmp_result);
         free(frame_buf);
         return bmp_result; // Propagate error from BMP loader
     }
-
-    // 8. Refresh the display with the appropriate bit depth
     switch (bits_per_pixel) {
         case 1:
             EPD_IT8951_1bp_Refresh(frame_buf, 0, 0, width, height, Mode, 0, false);
@@ -1061,11 +1032,10 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
             EPD_IT8951_8bp_Refresh(frame_buf, 0, 0, width, height, true, 0);
             break;
         default:
+            fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Invalid bit depth %d\n", bits_per_pixel);
             free(frame_buf);
             return -12; // Invalid bit depth
     }
-
-    // 9. Free buffer
     free(frame_buf);
     return 0;
 }

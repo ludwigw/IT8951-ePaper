@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     }
     fclose(fp);
     
-    printf("Displaying image on e-Paper...\n");
+    printf("epdraw: Displaying BMP: %s, VCOM: %d, mode: %d\n", bmp_path, vcom, mode);
     int result = EPD_IT8951_DisplayBMP(bmp_path, vcom, mode);
     if (result == 0) {
         printf("Image displayed successfully!\n");
@@ -199,7 +199,16 @@ int main(int argc, char *argv[])
             unlink(bmp_path);
         }
     } else {
-        printf("Failed to display image (error %d)\n", result);
+        fprintf(stderr, "epdraw: ERROR: Failed to display image (error code %d)\n", result);
+        if (result == -10) fprintf(stderr, "epdraw: ERROR: Failed to initialize display or get panel info\n");
+        else if (result == -11) fprintf(stderr, "epdraw: ERROR: Out of memory allocating display buffer\n");
+        else if (result == -12) fprintf(stderr, "epdraw: ERROR: Invalid bit depth\n");
+        else if (result == -1) fprintf(stderr, "epdraw: ERROR: BMP file not found or could not be opened\n");
+        else if (result == -2) fprintf(stderr, "epdraw: ERROR: BMP file header read error\n");
+        else if (result == -3) fprintf(stderr, "epdraw: ERROR: Not a BMP file\n");
+        else if (result == -4) fprintf(stderr, "epdraw: ERROR: BMP info header read error\n");
+        else if (result == -5) fprintf(stderr, "epdraw: ERROR: BMP palette read error or out of memory\n");
+        // Add more as needed
     }
     
     return result;
