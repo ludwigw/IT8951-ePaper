@@ -28,7 +28,18 @@ void DEV_Digital_Write(UWORD Pin, UBYTE Value) {
  * @return HIGH or LOW.
  */
 UBYTE DEV_Digital_Read(UWORD Pin) {
-    return bcm2835_gpio_lev(Pin);
+    printf("DEV_Digital_Read: Reading pin %d\n", Pin);
+    
+    // Check if we should skip GPIO reading (workaround for some Pi configurations)
+    const char* skip_gpio_read = getenv("SKIP_GPIO_READ");
+    if (skip_gpio_read && strcmp(skip_gpio_read, "1") == 0) {
+        printf("DEV_Digital_Read: SKIP_GPIO_READ=1, returning HIGH (idle state)\n");
+        return HIGH; // Assume idle state
+    }
+    
+    UBYTE value = bcm2835_gpio_lev(Pin);
+    printf("DEV_Digital_Read: Pin %d read value: %d\n", Pin, value);
+    return value;
 }
 
 /**
