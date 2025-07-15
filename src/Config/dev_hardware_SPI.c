@@ -29,6 +29,7 @@
 #
 ******************************************************************************/
 #include "dev_hardware_SPI.h"
+#include "Debug.h"
 
 
 #include <stdlib.h>
@@ -41,7 +42,7 @@
 #include <getopt.h> 
 #include <fcntl.h> 
 #include <sys/ioctl.h> 
-#include <linux/types.h> 
+#include <linux/types.h>
 #include <linux/spi/spidev.h> 
 
 HARDWARE_SPI hardware_SPI;

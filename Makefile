@@ -13,15 +13,20 @@ INCLUDE_DIR = include
 # Compiler and flags
 CC = gcc
 AR = ar
-CFLAGS = -I$(INCLUDE_DIR) $(foreach d,$(SRC_DIRS),-I$d) -I$(PLATFORM_DIR) -Wall -Wextra -g -O0 -std=gnu99
+CFLAGS = -I$(INCLUDE_DIR) $(foreach d,$(SRC_DIRS),-I$d) -I$(PLATFORM_DIR) -I/usr/include -Wall -Wextra -g -O0 -std=gnu99
 LDFLAGS =
 
 # Platform-specific sources
 PLATFORM_SRC_BCM = src/platform/DEV_Config_BCM.c
 PLATFORM_SRC_LGPIO = src/platform/DEV_Config_LGPIO.c
 PLATFORM_SRC_GPIOD = src/platform/DEV_Config_GPIOD.c
+PLATFORM_SRC_WAVESHARE = src/platform/DEV_Config_WAVESHARE.c
 
-ifeq ($(PLATFORM),BCM)
+ifeq ($(PLATFORM),WAVESHARE)
+PLATFORM_SRC = $(PLATFORM_SRC_WAVESHARE)
+PLATFORM_DEFS = -DBCM=0 -DLGPIO=0 -DGPIOD=0
+PLATFORM_LIBS = -lgpiod
+else ifeq ($(PLATFORM),BCM)
 PLATFORM_SRC = $(PLATFORM_SRC_BCM)
 PLATFORM_DEFS = -DBCM=1 -DLGPIO=0 -DGPIOD=0
 PLATFORM_LIBS = -lbcm2835
@@ -45,7 +50,7 @@ $(subst /,_,$(subst src/,,$(subst examples/,,$(1:.c=))))
 endef
 
 # Source and object files
-SRC = $(foreach d,$(SRC_DIRS),$(wildcard $d/*.c)) $(PLATFORM_SRC)
+SRC = $(foreach d,$(SRC_DIRS),$(wildcard $d/*.c)) $(PLATFORM_SRC) src/Config/Debug.c
 # Exclude the generic DEV_Config.c file, we only want platform-specific ones
 SRC := $(filter-out src/Config/DEV_Config.c,$(SRC))
 # Exclude platform-specific files from src/Config and src/platform based on platform
