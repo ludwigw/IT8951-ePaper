@@ -244,6 +244,7 @@ static UWORD EPD_IT8951_ReadReg(UWORD Reg_Address)
     EPD_IT8951_WriteCommand(IT8951_TCON_REG_RD);
     EPD_IT8951_WriteData(Reg_Address);
     Reg_Value =  EPD_IT8951_ReadData();
+    EPD_LOG_TRACE("ReadReg(0x%04X) = 0x%04X", Reg_Address, Reg_Value);
     return Reg_Value;
 }
 
@@ -381,9 +382,26 @@ parameter:
 static void EPD_IT8951_WaitForDisplayReady(void)
 {
     //Check IT8951 Register LUTAFSR => NonZero Busy, Zero - Free
+    EPD_LOG_DEBUG("Waiting for display to become ready...");
+    int timeout = 0;
+    const int max_timeout = 10000; // 10 second timeout
+    
     while( EPD_IT8951_ReadReg(LUTAFSR) )
     {
         //wait in idle state
+        timeout++;
+        if (timeout > max_timeout) {
+            EPD_LOG_ERROR("Display ready timeout - LUTAFSR register stuck at non-zero value");
+            break;
+        }
+        if (timeout % 1000 == 0) {
+            EPD_LOG_WARN("Display still busy after %d ms", timeout);
+        }
+        usleep(1000); // Sleep 1ms to avoid busy-waiting
+    }
+    
+    if (timeout <= max_timeout) {
+        EPD_LOG_DEBUG("Display became ready after %d ms", timeout);
     }
 }
 

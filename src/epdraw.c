@@ -92,7 +92,7 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
 int main(int argc, char *argv[])
 {
     // Initialize logging system
-    log_level_t log_level = LOG_LEVEL_WARN; // Default to WARN level (less verbose)
+    log_level_t log_level = LOG_LEVEL_DEBUG; // Temporarily set to DEBUG to see what's happening
     const char* log_level_str = getenv("LOG_LEVEL");
     if (log_level_str) {
         if (strcmp(log_level_str, "ERROR") == 0) log_level = LOG_LEVEL_ERROR;
