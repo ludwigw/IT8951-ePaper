@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
         printf("Usage: epdraw <image_path> [vcom] [mode]\n");
         printf("  <image_path>: Path to image file (any format: PNG, JPG, BMP, etc. - will be auto-converted)\n");
         printf("  [vcom]: VCOM voltage (default: 0, use panel default)\n");
+        printf("          Can be integer (2510) or float (-1.18V)\n");
         printf("  [mode]: Display mode (default: 2, GC16)\n");
         printf("\nDisplay modes:\n");
         printf("  0: INIT mode - Clear display (1bpp, no mirroring)\n");
@@ -121,13 +122,34 @@ int main(int argc, char *argv[])
         printf("  - Color vs grayscale mode\n");
         printf("\nExamples:\n");
         printf("  epdraw photo.jpg                    # Any image format, auto-converted and displayed\n");
-        printf("  epdraw photo.png 2510 2             # Custom VCOM and mode\n");
+        printf("  epdraw photo.png -1.18 2            # Custom VCOM (-1.18V) and mode\n");
         printf("  epdraw image.bmp                    # Direct BMP display (no conversion needed)\n");
         return 1;
     }
     
     const char *input_path = argv[1];
-    int vcom = (argc > 2) ? atoi(argv[2]) : 0;
+    
+    // Parse VCOM value - can be integer (like 2510) or float (like -1.18)
+    int vcom = 0;
+    if (argc > 2) {
+        char *endptr;
+        double vcom_float = strtod(argv[2], &endptr);
+        if (*endptr == '\0') {
+            // Valid number - convert to VCOM format
+            // VCOM values are in millivolts × 1000, e.g., 2510 = -2.51V
+            if (vcom_float < 0) {
+                // Negative voltage: convert to positive integer format
+                vcom = (int)(-vcom_float * 1000);
+            } else {
+                // Positive voltage: convert to integer format
+                vcom = (int)(vcom_float * 1000);
+            }
+        } else {
+            // Try as integer
+            vcom = atoi(argv[2]);
+        }
+    }
+    
     int mode = (argc > 3) ? atoi(argv[3]) : 2; // GC16_Mode
     
     // Validate mode
