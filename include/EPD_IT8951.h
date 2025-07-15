@@ -39,7 +39,7 @@ typedef struct IT8951_Area_Img_Info {
 /**
  * @brief Device information structure for IT8951.
  */
-typedef struct IT8951_Dev_Info {
+typedef struct __attribute__((packed)) IT8951_Dev_Info {
     UWORD Panel_W; /**< Panel width. */
     UWORD Panel_H; /**< Panel height. */
     UWORD Memory_Addr_L; /**< Low part of memory address. */

@@ -376,6 +376,13 @@ static void EPD_IT8951_GetSystemInfo(void* Buf)
     EPD_LOG_DEBUG("Reading device info data");
     EPD_IT8951_ReadMultiData((UWORD*)Buf, sizeof(IT8951_Dev_Info)/2);
 
+    // Print raw buffer for debugging
+    UWORD* raw = (UWORD*)Buf;
+    EPD_LOG_DEBUG("Raw panel info data:");
+    for (int i = 0; i < sizeof(IT8951_Dev_Info)/2; i++) {
+        EPD_LOG_DEBUG("  raw[%d] = 0x%04X", i, raw[i]);
+    }
+
     Dev_Info = (IT8951_Dev_Info*)Buf;
     EPD_LOG_INFO("Retrieved panel size: %dx%d", Dev_Info->Panel_W, Dev_Info->Panel_H);
     EPD_LOG_DEBUG("Memory address: 0x%X", Dev_Info->Memory_Addr_L | (Dev_Info->Memory_Addr_H << 16));
