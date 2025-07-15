@@ -23,13 +23,13 @@ UBYTE DEV_Digital_Read(UWORD Pin) {
 
 // --- SPI Abstraction ---
 void DEV_SPI_WriteByte(UBYTE Value) {
-    EPD_LOG_DEBUG("[PLATFORM] SPI write byte: 0x%02X", Value);
+    EPD_LOG_TRACE("[PLATFORM] SPI write byte: 0x%02X", Value);
     DEV_HARDWARE_SPI_TransferByte(Value);
 }
 
 UBYTE DEV_SPI_ReadByte() {
     UBYTE value = DEV_HARDWARE_SPI_TransferByte(0x00);
-    EPD_LOG_DEBUG("[PLATFORM] SPI read byte: 0x%02X", value);
+    EPD_LOG_TRACE("[PLATFORM] SPI read byte: 0x%02X", value);
     return value;
 }
 
