@@ -6,6 +6,7 @@
 #include <libgen.h>
 #include "../include/EPD_IT8951.h"
 #include "../include/Debug.h"
+#include "../include/DEV_Config.h"
 
 #define MAX_PATH 1024
 #define MAX_CMD 2048
@@ -91,6 +92,8 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
 
 int main(int argc, char *argv[])
 {
+    // Print BUSY pin state at startup
+    printf("BUSY pin state at startup: %d\n", DEV_Digital_Read(EPD_BUSY_PIN));
     // Initialize logging system
     log_level_t log_level = LOG_LEVEL_DEBUG; // Temporarily set to DEBUG to see what's happening
     const char* log_level_str = getenv("LOG_LEVEL");
@@ -148,6 +151,9 @@ int main(int argc, char *argv[])
             // Try as integer
             vcom = atoi(argv[2]);
         }
+    } else {
+        // Default to 0 to use panel default (don't change VCOM)
+        vcom = 0;
     }
     
     int mode = (argc > 3) ? atoi(argv[3]) : 2; // GC16_Mode

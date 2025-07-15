@@ -77,6 +77,8 @@ static void EPD_IT8951_ReadBusy(void)
     
     if (timeout <= max_timeout) {
         EPD_LOG_TRACE("ReadBusy: Released after %d ms", timeout);
+    } else {
+        EPD_LOG_ERROR("ReadBusy: Display stuck in busy state - may need reset");
     }
 }
 
