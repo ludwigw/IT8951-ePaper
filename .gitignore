@@ -1,3 +1,10 @@
+bin/
+*.o
+*.a
+*.so
+*.d
+*.out
+*.exe
 bin
 docs/api/html/
 docs/api/latex/

@@ -40,16 +40,16 @@ test_GUI_Paint_alignment: test_GUI_Paint_alignment.c ../src/GUI/GUI_Paint.c mock
 test_GUI_Paint_edgecases: test_GUI_Paint_edgecases.c ../src/GUI/GUI_Paint.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
-test_EPD_IT8951_buffer: test_EPD_IT8951_buffer.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c mock_DEV_Config.c
+test_EPD_IT8951_buffer: test_EPD_IT8951_buffer.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c ../src/Config/Debug.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
-test_EPD_IT8951_structs: test_EPD_IT8951_structs.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c mock_DEV_Config.c
+test_EPD_IT8951_structs: test_EPD_IT8951_structs.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c ../src/Config/Debug.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
-test_EPD_IT8951_modes: test_EPD_IT8951_modes.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c mock_DEV_Config.c
+test_EPD_IT8951_modes: test_EPD_IT8951_modes.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c ../src/Config/Debug.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
-test_EPD_IT8951_error: test_EPD_IT8951_error.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c mock_DEV_Config.c
+test_EPD_IT8951_error: test_EPD_IT8951_error.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c ../src/Config/Debug.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
 test_DEV_Config_platform: test_DEV_Config_platform.c
@@ -70,13 +70,13 @@ test_DEV_Config_platform_gpiod: test_DEV_Config_platform_gpiod.c
 test_GUI_Fonts: test_GUI_Fonts.c ../src/GUI/GUI_Paint.c ../src/Fonts/font8.c ../src/Fonts/font12.c ../src/Fonts/font16.c ../src/Fonts/font20.c ../src/Fonts/font24.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
-test_EPD_IT8951_DisplayBMP: test_EPD_IT8951_DisplayBMP.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c mock_DEV_Config.c
+test_EPD_IT8951_DisplayBMP: test_EPD_IT8951_DisplayBMP.c ../src/e-Paper/EPD_IT8951.c ../src/GUI/GUI_BMPfile.c ../src/GUI/GUI_Paint.c ../src/Config/Debug.c mock_DEV_Config.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
 test_cli: test_cli.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
-test_config_logic: test_config_logic.c ../src/e-Paper/EPD_IT8951.c
+test_config_logic: test_config_logic.c ../src/e-Paper/EPD_IT8951.c ../src/Config/Debug.c
 	$(CC) -I. $(CFLAGS) $^ -o $@ -lm
 
 run: all

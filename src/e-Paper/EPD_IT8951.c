@@ -11,6 +11,7 @@
  */
 #include "EPD_IT8951.h"
 #include <time.h>
+#include <stdlib.h> // Added for getenv
 
 // External variables for display configuration
 extern UBYTE isColor;
@@ -30,20 +31,20 @@ parameter:
 ******************************************************************************/
 static void EPD_IT8951_Reset(void)
 {
-    printf("EPD_IT8951_Reset: Starting hardware reset sequence\n");
-    printf("EPD_IT8951_Reset: Setting RST_PIN HIGH\n");
+    EPD_LOG_INFO("Starting hardware reset sequence");
+    EPD_LOG_DEBUG("Setting RST_PIN HIGH");
     DEV_Digital_Write(EPD_RST_PIN, HIGH);
-    printf("EPD_IT8951_Reset: Delaying 200ms\n");
+    EPD_LOG_DEBUG("Delaying 200ms");
     DEV_Delay_ms(200);
-    printf("EPD_IT8951_Reset: Setting RST_PIN LOW\n");
+    EPD_LOG_DEBUG("Setting RST_PIN LOW");
     DEV_Digital_Write(EPD_RST_PIN, LOW);
-    printf("EPD_IT8951_Reset: Delaying 10ms\n");
+    EPD_LOG_DEBUG("Delaying 10ms");
     DEV_Delay_ms(10);
-    printf("EPD_IT8951_Reset: Setting RST_PIN HIGH\n");
+    EPD_LOG_DEBUG("Setting RST_PIN HIGH");
     DEV_Digital_Write(EPD_RST_PIN, HIGH);
-    printf("EPD_IT8951_Reset: Delaying 200ms\n");
+    EPD_LOG_DEBUG("Delaying 200ms");
     DEV_Delay_ms(200);
-    printf("EPD_IT8951_Reset: Hardware reset sequence completed\n");
+    EPD_LOG_INFO("Hardware reset sequence completed");
 }
 
 
@@ -69,22 +70,23 @@ parameter:  command
 ******************************************************************************/
 static void EPD_IT8951_WriteCommand(UWORD Command)
 {
-	//Set Preamble for Write Command
-	UWORD Write_Preamble = 0x6000;
-	
-	EPD_IT8951_ReadBusy();
+    //Set Preamble for Write Command
+    UWORD Write_Preamble = 0x6000;
+    
+    EPD_IT8951_ReadBusy();
 
     DEV_Digital_Write(EPD_CS_PIN, LOW);
-	
-	DEV_SPI_WriteByte(Write_Preamble>>8);
-	DEV_SPI_WriteByte(Write_Preamble);
-	
-	EPD_IT8951_ReadBusy();	
-	
-	DEV_SPI_WriteByte(Command>>8);
-	DEV_SPI_WriteByte(Command);
-	
-	DEV_Digital_Write(EPD_CS_PIN, HIGH);
+
+    EPD_LOG_TRACE("Sending command 0x%04X", Command);
+    DEV_SPI_WriteByte(Write_Preamble>>8);
+    DEV_SPI_WriteByte(Write_Preamble);
+    
+    EPD_IT8951_ReadBusy();    
+    
+    DEV_SPI_WriteByte(Command>>8);
+    DEV_SPI_WriteByte(Command);
+    
+    DEV_Digital_Write(EPD_CS_PIN, HIGH);
 }
 
 
@@ -636,9 +638,9 @@ parameter:  Run the system
 ******************************************************************************/
 void EPD_IT8951_SystemRun(void)
 {
-    printf("EPD_IT8951_SystemRun: Sending SYS_RUN command\n");
+    EPD_LOG_DEBUG("Sending SYS_RUN command");
     EPD_IT8951_WriteCommand(IT8951_TCON_SYS_RUN);
-    printf("EPD_IT8951_SystemRun: SYS_RUN command sent\n");
+    EPD_LOG_DEBUG("SYS_RUN command sent");
 }
 
 
@@ -668,42 +670,42 @@ parameter:
 ******************************************************************************/
 IT8951_Dev_Info EPD_IT8951_Init(UWORD VCOM)
 {
-    printf("EPD_IT8951_Init: Starting initialization with VCOM=%d\n", VCOM);
+    EPD_LOG_INFO("Starting initialization with VCOM=%d", VCOM);
     IT8951_Dev_Info Dev_Info;
 
-    printf("EPD_IT8951_Init: Calling EPD_IT8951_Reset()\n");
+    EPD_LOG_DEBUG("Calling EPD_IT8951_Reset()");
     EPD_IT8951_Reset();
-    printf("EPD_IT8951_Init: Reset completed\n");
+    EPD_LOG_DEBUG("Reset completed");
 
-    printf("EPD_IT8951_Init: Calling EPD_IT8951_SystemRun()\n");
+    EPD_LOG_DEBUG("Calling EPD_IT8951_SystemRun()");
     EPD_IT8951_SystemRun();
-    printf("EPD_IT8951_Init: System run completed\n");
+    EPD_LOG_DEBUG("System run completed");
 
-    printf("EPD_IT8951_Init: Calling EPD_IT8951_GetSystemInfo()\n");
+    EPD_LOG_DEBUG("Calling EPD_IT8951_GetSystemInfo()");
     EPD_IT8951_GetSystemInfo(&Dev_Info);
-    printf("EPD_IT8951_Init: Got system info - Panel: %dx%d\n", Dev_Info.Panel_W, Dev_Info.Panel_H);
+    EPD_LOG_INFO("Got system info - Panel: %dx%d", Dev_Info.Panel_W, Dev_Info.Panel_H);
     
-    printf("EPD_IT8951_Init: Enabling pack write\n");
+    EPD_LOG_DEBUG("Enabling pack write");
     EPD_IT8951_WriteReg(I80CPCR,0x0001);
-    printf("EPD_IT8951_Init: Pack write enabled\n");
+    EPD_LOG_DEBUG("Pack write enabled");
 
-    printf("EPD_IT8951_Init: Getting current VCOM\n");
+    EPD_LOG_DEBUG("Getting current VCOM");
     UWORD current_vcom = EPD_IT8951_GetVCOM();
-    printf("EPD_IT8951_Init: Current VCOM=%d, requested VCOM=%d\n", current_vcom, VCOM);
+    EPD_LOG_DEBUG("Current VCOM=%d, requested VCOM=%d", current_vcom, VCOM);
     
     if(VCOM != current_vcom)
     {
-        printf("EPD_IT8951_Init: Setting VCOM to %d\n", VCOM);
+        EPD_LOG_INFO("Setting VCOM to %d", VCOM);
         EPD_IT8951_SetVCOM(VCOM);
         UWORD new_vcom = EPD_IT8951_GetVCOM();
-        printf("EPD_IT8951_Init: VCOM set to %d\n", new_vcom);
+        EPD_LOG_INFO("VCOM set to %d", new_vcom);
     }
     else
     {
-        printf("EPD_IT8951_Init: VCOM already set correctly\n");
+        EPD_LOG_DEBUG("VCOM already set correctly");
     }
     
-    printf("EPD_IT8951_Init: Initialization completed successfully\n");
+    EPD_LOG_INFO("Initialization completed successfully");
     return Dev_Info;
 }
 
@@ -1006,14 +1008,14 @@ EPD_Config EPD_IT8951_ComputeConfig(UWORD mode) {
 }
 
 int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
-    printf("EPD_IT8951_DisplayBMP: path=%s, VCOM=%d, Mode=%d\n", path, VCOM, Mode);
+    EPD_LOG_INFO("path=%s, VCOM=%d, Mode=%d", path, VCOM, Mode);
     // 1. Initialize the display and get device info
     IT8951_Dev_Info dev_info = EPD_IT8951_Init(VCOM);
     if (dev_info.Panel_W == 0 || dev_info.Panel_H == 0) {
-        fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Failed to initialize display or get panel info\n");
+        EPD_LOG_ERROR("Failed to initialize display or get panel info");
         return -10; // Failed to init or get panel info
     }
-    printf("EPD_IT8951_DisplayBMP: Initialized display, panel size: %dx%d\n", dev_info.Panel_W, dev_info.Panel_H);
+    EPD_LOG_INFO("Initialized display, panel size: %dx%d", dev_info.Panel_W, dev_info.Panel_H);
     EPD_Config cfg = EPD_IT8951_ComputeConfig(Mode);
     Paint_SetRotate(cfg.rotate);
     Paint_SetMirroring(cfg.mirror);
@@ -1034,10 +1036,10 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
     } else {
         image_size = width * height;
     }
-    printf("EPD_IT8951_DisplayBMP: Allocating frame buffer of size %u\n", image_size);
+    EPD_LOG_DEBUG("Allocating frame buffer of size %u", image_size);
     UBYTE *frame_buf = (UBYTE*)malloc(image_size);
     if (!frame_buf) {
-        fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Out of memory allocating display buffer\n");
+        EPD_LOG_ERROR("Out of memory allocating display buffer");
         return -11; // Out of memory
     }
     Paint_NewImage(frame_buf, width, height, ROTATE_0, WHITE);
@@ -1045,9 +1047,9 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
     Paint_SetBitsPerPixel(bits_per_pixel);
     Paint_Clear(WHITE);
     int bmp_result = GUI_ReadBmp(path, 0, 0);
-    printf("EPD_IT8951_DisplayBMP: Loaded BMP file, result=%d\n", bmp_result);
+    EPD_LOG_DEBUG("Loaded BMP file, result=%d", bmp_result);
     if (bmp_result < 0) {
-        fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Failed to load BMP file (error %d)\n", bmp_result);
+        EPD_LOG_ERROR("Failed to load BMP file (error %d)", bmp_result);
         free(frame_buf);
         return bmp_result; // Propagate error from BMP loader
     }

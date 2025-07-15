@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <libgen.h>
 #include "../include/EPD_IT8951.h"
+#include "../include/Debug.h"
 
 #define MAX_PATH 1024
 #define MAX_CMD 2048
@@ -90,6 +91,18 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
 
 int main(int argc, char *argv[])
 {
+    // Initialize logging system
+    log_level_t log_level = LOG_LEVEL_INFO; // Default to INFO level
+    const char* log_level_str = getenv("LOG_LEVEL");
+    if (log_level_str) {
+        if (strcmp(log_level_str, "ERROR") == 0) log_level = LOG_LEVEL_ERROR;
+        else if (strcmp(log_level_str, "WARN") == 0) log_level = LOG_LEVEL_WARN;
+        else if (strcmp(log_level_str, "INFO") == 0) log_level = LOG_LEVEL_INFO;
+        else if (strcmp(log_level_str, "DEBUG") == 0) log_level = LOG_LEVEL_DEBUG;
+        else if (strcmp(log_level_str, "TRACE") == 0) log_level = LOG_LEVEL_TRACE;
+    }
+    log_init(log_level);
+    
     if (argc < 2 || (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0))) {
         printf("Usage: epdraw <image_path> [vcom] [mode]\n");
         printf("  <image_path>: Path to image file (any format: PNG, JPG, BMP, etc. - will be auto-converted)\n");
