@@ -1129,18 +1129,19 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         free(frame_buf);
         return bmp_result; // Propagate error from BMP loader
     }
+    UDOUBLE target_memory_addr = dev_info.Memory_Addr_L | ((UDOUBLE)dev_info.Memory_Addr_H << 16);
     switch (bits_per_pixel) {
         case 1:
-            EPD_IT8951_1bp_Refresh(frame_buf, 0, 0, width, height, Mode, 0, false);
+            EPD_IT8951_1bp_Refresh(frame_buf, 0, 0, width, height, Mode, target_memory_addr, false);
             break;
         case 2:
-            EPD_IT8951_2bp_Refresh(frame_buf, 0, 0, width, height, false, 0, false);
+            EPD_IT8951_2bp_Refresh(frame_buf, 0, 0, width, height, false, target_memory_addr, false);
             break;
         case 4:
-            EPD_IT8951_4bp_Refresh(frame_buf, 0, 0, width, height, true, 0, false);
+            EPD_IT8951_4bp_Refresh(frame_buf, 0, 0, width, height, false, target_memory_addr, false);
             break;
         case 8:
-            EPD_IT8951_8bp_Refresh(frame_buf, 0, 0, width, height, true, 0);
+            EPD_IT8951_8bp_Refresh(frame_buf, 0, 0, width, height, false, target_memory_addr);
             break;
         default:
             EPD_LOG_ERROR("Invalid bit depth %d", bits_per_pixel);

@@ -10,14 +10,14 @@
 // --- GPIO Abstraction ---
 void DEV_Digital_Write(UWORD Pin, UBYTE Value) {
     if (Pin == EPD_CS_PIN) {
-        EPD_LOG_DEBUG("[PLATFORM] CS pin write: pin=%d, value=%d (%s)", Pin, Value, Value ? "HIGH" : "LOW");
+        EPD_LOG_TRACE("[PLATFORM] CS pin write: pin=%d, value=%d (%s)", Pin, Value, Value ? "HIGH" : "LOW");
     }
     GPIOD_Write(Pin, Value);
 }
 
 UBYTE DEV_Digital_Read(UWORD Pin) {
     UBYTE value = GPIOD_Read(Pin);
-    EPD_LOG_DEBUG("[PLATFORM] Digital read: pin=%d, value=%d", Pin, value);
+    EPD_LOG_TRACE("[PLATFORM] Digital read: pin=%d, value=%d", Pin, value);
     return value;
 }
 
