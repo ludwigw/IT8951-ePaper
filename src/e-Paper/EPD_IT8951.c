@@ -34,16 +34,16 @@ static void EPD_IT8951_Reset(void)
     EPD_LOG_INFO("Starting hardware reset sequence");
     EPD_LOG_DEBUG("Setting RST_PIN HIGH");
     DEV_Digital_Write(EPD_RST_PIN, HIGH);
-    EPD_LOG_DEBUG("Delaying 500ms");
-    DEV_Delay_ms(500);
+    EPD_LOG_DEBUG("Delaying 200ms");
+    DEV_Delay_ms(200);
     EPD_LOG_DEBUG("Setting RST_PIN LOW");
     DEV_Digital_Write(EPD_RST_PIN, LOW);
-    EPD_LOG_DEBUG("Delaying 50ms");
-    DEV_Delay_ms(50);
+    EPD_LOG_DEBUG("Delaying 10ms");
+    DEV_Delay_ms(10);
     EPD_LOG_DEBUG("Setting RST_PIN HIGH");
     DEV_Digital_Write(EPD_RST_PIN, HIGH);
-    EPD_LOG_DEBUG("Delaying 500ms");
-    DEV_Delay_ms(500);
+    EPD_LOG_DEBUG("Delaying 200ms");
+    DEV_Delay_ms(200);
     EPD_LOG_INFO("Hardware reset sequence completed");
 }
 
