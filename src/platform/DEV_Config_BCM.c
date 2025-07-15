@@ -97,6 +97,10 @@ static void DEV_GPIO_Init(void) {
     DEV_LOG_DEBUG("Configuring BUSY_PIN (%d) as input", EPD_BUSY_PIN);
     DEV_GPIO_Mode(EPD_BUSY_PIN, BCM2835_GPIO_FSEL_INPT);
     DEV_LOG_DEBUG("BUSY_PIN configured successfully");
+    // Enable pull-up on BUSY_PIN
+    DEV_LOG_DEBUG("Enabling pull-up resistor on BUSY_PIN (%d)", EPD_BUSY_PIN);
+    bcm2835_gpio_set_pud(EPD_BUSY_PIN, BCM2835_GPIO_PUD_UP);
+    DEV_LOG_DEBUG("Pull-up resistor enabled on BUSY_PIN");
     DEV_LOG_DEBUG("Setting CS_PIN HIGH");
     DEV_Digital_Write(EPD_CS_PIN, HIGH);
     DEV_LOG_DEBUG("CS_PIN set HIGH successfully");
