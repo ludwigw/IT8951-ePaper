@@ -54,13 +54,30 @@ parameter:
 ******************************************************************************/
 static void EPD_IT8951_ReadBusy(void)
 {
-	// Debug("Busy ------\r\n");
+    EPD_LOG_TRACE("ReadBusy: Checking BUSY pin");
     UBYTE Busy_State = DEV_Digital_Read(EPD_BUSY_PIN);
+    EPD_LOG_TRACE("ReadBusy: Initial state = %d", Busy_State);
+    
     //0: busy, 1: idle
+    int timeout = 0;
+    const int max_timeout = 5000; // 5 second timeout
+    
     while(Busy_State == 0) {
         Busy_State = DEV_Digital_Read(EPD_BUSY_PIN);
+        timeout++;
+        if (timeout > max_timeout) {
+            EPD_LOG_ERROR("ReadBusy timeout - BUSY pin stuck at LOW for %d ms", timeout);
+            break;
+        }
+        if (timeout % 1000 == 0) {
+            EPD_LOG_WARN("ReadBusy: Still busy after %d ms", timeout);
+        }
+        usleep(1000); // Sleep 1ms to avoid busy-waiting
     }
-	// Debug("Busy Release ------\r\n");
+    
+    if (timeout <= max_timeout) {
+        EPD_LOG_TRACE("ReadBusy: Released after %d ms", timeout);
+    }
 }
 
 
@@ -224,13 +241,18 @@ description:	some situation like this:
 ******************************************************************************/
 static void EPD_IT8951_WriteMultiArg(UWORD Arg_Cmd, UWORD* Arg_Buf, UWORD Arg_Num)
 {
+     EPD_LOG_DEBUG("WriteMultiArg: Cmd=0x%04X, Args=%d", Arg_Cmd, Arg_Num);
      //Send Cmd code
+     EPD_LOG_DEBUG("Sending command 0x%04X", Arg_Cmd);
      EPD_IT8951_WriteCommand(Arg_Cmd);
+     EPD_LOG_DEBUG("Command sent, writing %d arguments", Arg_Num);
      //Send Data
      for(UWORD i=0; i<Arg_Num; i++)
      {
+         EPD_LOG_DEBUG("Writing arg[%d] = 0x%04X", i, Arg_Buf[i]);
          EPD_IT8951_WriteData(Arg_Buf[i]);
      }
+     EPD_LOG_DEBUG("WriteMultiArg completed");
 }
 
 
@@ -588,6 +610,7 @@ parameter:
 ******************************************************************************/
 static void EPD_IT8951_Display_Area(UWORD X,UWORD Y,UWORD W,UWORD H,UWORD Mode)
 {
+    EPD_LOG_DEBUG("Display_Area: %dx%d at (%d,%d), Mode=%d", W, H, X, Y, Mode);
     UWORD Args[5];
     Args[0] = X;
     Args[1] = Y;
@@ -595,7 +618,9 @@ static void EPD_IT8951_Display_Area(UWORD X,UWORD Y,UWORD W,UWORD H,UWORD Mode)
     Args[3] = H;
     Args[4] = Mode;
     //0x0034
+    EPD_LOG_DEBUG("Sending DPY_AREA command");
     EPD_IT8951_WriteMultiArg(USDEF_I80_CMD_DPY_AREA, Args,5);
+    EPD_LOG_DEBUG("DPY_AREA command sent");
 }
 
 
