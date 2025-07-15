@@ -1082,6 +1082,8 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         EPD_LOG_ERROR("Failed to initialize display or get panel info");
         return -10; // Failed to init or get panel info
     }
+    // Unconditionally clear the panel with INIT_Mode, just like the demo
+    EPD_IT8951_Clear_Refresh(dev_info, 0, INIT_Mode);
     EPD_LOG_INFO("Initialized display, panel size: %dx%d", dev_info.Panel_W, dev_info.Panel_H);
     EPD_Config cfg = EPD_IT8951_ComputeConfig(Mode);
     Paint_SetRotate(cfg.rotate);
