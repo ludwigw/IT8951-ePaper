@@ -546,6 +546,12 @@ static void EPD_IT8951_HostAreaPackedPixelWrite_4bp(IT8951_Load_Img_Info*Load_Im
     Source_Buffer_Width = (Area_Img_Info->Area_W*4/8)/2;
     Source_Buffer_Height = Area_Img_Info->Area_H;
     Source_Buffer_Length = Source_Buffer_Width * Source_Buffer_Height;
+
+    EPD_LOG_DEBUG("HostAreaPackedPixelWrite_4bp: Area_W=%d, Area_H=%d", Area_Img_Info->Area_W, Area_Img_Info->Area_H);
+    EPD_LOG_DEBUG("First 16 words of buffer:");
+for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
+    EPD_LOG_DEBUG("  buf[%d] = 0x%04X", k, ((UWORD*)Load_Img_Info->Source_Buffer_Addr)[k]);
+}
     
     EPD_LOG_DEBUG("Buffer dimensions: %dx%d, length=%d", Source_Buffer_Width, Source_Buffer_Height, Source_Buffer_Length);
 
