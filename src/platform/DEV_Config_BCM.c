@@ -125,15 +125,13 @@ UBYTE DEV_Module_Init(void) {
     } else {
         DEV_LOG_WARN("/dev/spidev0.0 not accessible (errno: %d)", errno);
     }
-    Debug("/***********************************/ \r\n");
+    DEV_LOG_INFO("Starting BCM2835 initialization");
     DEV_LOG_DEBUG("Calling bcm2835_init()");
     if(!bcm2835_init()) {
         DEV_LOG_ERROR("bcm2835_init() failed!");
-        Debug("bcm2835 init failed  !!! \r\n");
         return 1;
     } else {
         DEV_LOG_INFO("bcm2835_init() succeeded");
-        Debug("bcm2835 init success !!! \r\n");
     }
     DEV_LOG_DEBUG("bcm2835 library version: %u", bcm2835_version());
     DEV_LOG_INFO("Starting SPI configuration");
@@ -154,7 +152,6 @@ UBYTE DEV_Module_Init(void) {
     DEV_GPIO_Init();
     DEV_LOG_DEBUG("GPIO initialization completed");
     DEV_LOG_INFO("BCM2835 initialization completed successfully");
-    Debug("/***********************************/ \r\n");
     return 0;
 }
 

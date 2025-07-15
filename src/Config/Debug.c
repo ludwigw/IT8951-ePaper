@@ -5,7 +5,7 @@
 #include <string.h>
 
 // Global log level
-log_level_t current_log_level = LOG_LEVEL_INFO; // Default to INFO level
+log_level_t current_log_level = LOG_LEVEL_WARN; // Default to WARN level (less verbose)
 
 // Log level names for output
 static const char* log_level_names[] = {

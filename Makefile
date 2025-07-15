@@ -13,7 +13,7 @@ INCLUDE_DIR = include
 # Compiler and flags
 CC = gcc
 AR = ar
-CFLAGS = -I$(INCLUDE_DIR) $(foreach d,$(SRC_DIRS),-I$d) -I$(PLATFORM_DIR) -Wall -Wextra -g -O0 -D USE_DEBUG -std=gnu99
+CFLAGS = -I$(INCLUDE_DIR) $(foreach d,$(SRC_DIRS),-I$d) -I$(PLATFORM_DIR) -Wall -Wextra -g -O0 -std=gnu99
 LDFLAGS =
 
 # Platform-specific sources

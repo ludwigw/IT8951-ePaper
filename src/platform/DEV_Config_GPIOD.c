@@ -93,13 +93,11 @@ static void DEV_GPIO_Init(void) {
  * @return 0 on success, nonzero on failure.
  */
 UBYTE DEV_Module_Init(void) {
-    Debug("/***********************************/ \r\n");
-    printf("Write and read /dev/spidev0.0 \r\n");
+    DEV_LOG_INFO("Initializing GPIOD platform with /dev/spidev0.0");
     GPIOD_Export();
     DEV_GPIO_Init();
     DEV_HARDWARE_SPI_begin("/dev/spidev0.0");
     DEV_HARDWARE_SPI_setSpeed(12500000);
-    Debug("/***********************************/ \r\n");
     return 0;
 }
 

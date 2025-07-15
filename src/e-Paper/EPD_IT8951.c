@@ -342,21 +342,21 @@ parameter:
 ******************************************************************************/
 static void EPD_IT8951_GetSystemInfo(void* Buf)
 {
-    printf("EPD_IT8951_GetSystemInfo: Starting system info retrieval\n");
+    EPD_LOG_DEBUG("Starting system info retrieval");
     IT8951_Dev_Info* Dev_Info; 
 
-    printf("EPD_IT8951_GetSystemInfo: Sending GET_DEV_INFO command\n");
+    EPD_LOG_DEBUG("Sending GET_DEV_INFO command");
     EPD_IT8951_WriteCommand(USDEF_I80_CMD_GET_DEV_INFO);
 
-    printf("EPD_IT8951_GetSystemInfo: Reading device info data\n");
+    EPD_LOG_DEBUG("Reading device info data");
     EPD_IT8951_ReadMultiData((UWORD*)Buf, sizeof(IT8951_Dev_Info)/2);
 
     Dev_Info = (IT8951_Dev_Info*)Buf;
-    printf("EPD_IT8951_GetSystemInfo: Retrieved panel size: %dx%d\n", Dev_Info->Panel_W, Dev_Info->Panel_H);
-    printf("EPD_IT8951_GetSystemInfo: Memory address: 0x%X\n", Dev_Info->Memory_Addr_L | (Dev_Info->Memory_Addr_H << 16));
-    printf("EPD_IT8951_GetSystemInfo: FW Version: %s\n", (UBYTE*)Dev_Info->FW_Version);
-    printf("EPD_IT8951_GetSystemInfo: LUT Version: %s\n", (UBYTE*)Dev_Info->LUT_Version);
-    printf("EPD_IT8951_GetSystemInfo: System info retrieval completed\n");
+    EPD_LOG_INFO("Retrieved panel size: %dx%d", Dev_Info->Panel_W, Dev_Info->Panel_H);
+    EPD_LOG_DEBUG("Memory address: 0x%X", Dev_Info->Memory_Addr_L | (Dev_Info->Memory_Addr_H << 16));
+    EPD_LOG_DEBUG("FW Version: %s", (UBYTE*)Dev_Info->FW_Version);
+    EPD_LOG_DEBUG("LUT Version: %s", (UBYTE*)Dev_Info->LUT_Version);
+    EPD_LOG_DEBUG("System info retrieval completed");
 }
 
 
@@ -1067,7 +1067,7 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
             EPD_IT8951_8bp_Refresh(frame_buf, 0, 0, width, height, true, 0);
             break;
         default:
-            fprintf(stderr, "EPD_IT8951_DisplayBMP: ERROR: Invalid bit depth %d\n", bits_per_pixel);
+            EPD_LOG_ERROR("Invalid bit depth %d", bits_per_pixel);
             free(frame_buf);
             return -12; // Invalid bit depth
     }
