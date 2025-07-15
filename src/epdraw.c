@@ -92,8 +92,6 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
 
 int main(int argc, char *argv[])
 {
-    // Print BUSY pin state at startup
-    printf("BUSY pin state at startup: %d\n", DEV_Digital_Read(EPD_BUSY_PIN));
     // Initialize logging system
     log_level_t log_level = LOG_LEVEL_DEBUG; // Temporarily set to DEBUG to see what's happening
     const char* log_level_str = getenv("LOG_LEVEL");
@@ -234,6 +232,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "epdraw: ERROR: Failed to initialize hardware\n");
         return 2;
     }
+    // Print BUSY pin state after hardware init
+    printf("BUSY pin state after init: %d\n", DEV_Digital_Read(EPD_BUSY_PIN));
     printf("epdraw: Hardware initialization completed\n");
     
     printf("epdraw: Displaying BMP: %s, VCOM: %d, mode: %d\n", bmp_path, vcom, mode);
