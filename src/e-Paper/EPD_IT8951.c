@@ -1104,11 +1104,11 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
     }
     UDOUBLE image_size;
     if (bits_per_pixel == 1) {
-        image_size = ((width + 7) / 8) * height;
+        image_size = (((width * 1) % 8 == 0) ? (width * 1 / 8) : (width * 1 / 8 + 1)) * height;
     } else if (bits_per_pixel == 2) {
-        image_size = ((width + 3) / 4) * height;
+        image_size = (((width * 2) % 8 == 0) ? (width * 2 / 8) : (width * 2 / 8 + 1)) * height;
     } else if (bits_per_pixel == 4) {
-        image_size = ((width + 1) / 2) * height;
+        image_size = (((width * 4) % 8 == 0) ? (width * 4 / 8) : (width * 4 / 8 + 1)) * height;
     } else {
         image_size = width * height;
     }
