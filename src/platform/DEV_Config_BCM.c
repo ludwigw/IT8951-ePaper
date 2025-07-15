@@ -148,8 +148,8 @@ UBYTE DEV_Module_Init(void) {
     DEV_LOG_DEBUG("Setting SPI data mode to MODE0");
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
     DEV_LOG_DEBUG("SPI data mode set successfully");
-    DEV_LOG_DEBUG("Setting SPI clock divider to 32");
-    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
+    DEV_LOG_DEBUG("Setting SPI clock divider to 16");
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_16);
     DEV_LOG_DEBUG("SPI clock divider set successfully");
     DEV_LOG_INFO("SPI configuration completed");
     DEV_LOG_DEBUG("Initializing GPIO pins");
