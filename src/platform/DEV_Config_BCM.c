@@ -142,8 +142,8 @@ UBYTE DEV_Module_Init(void) {
     DEV_LOG_DEBUG("Calling bcm2835_spi_begin()");
     bcm2835_spi_begin();
     DEV_LOG_DEBUG("bcm2835_spi_begin() completed");
-    DEV_LOG_DEBUG("Setting SPI bit order to MSBFIRST");
-    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    DEV_LOG_DEBUG("Setting SPI bit order to LSBFIRST");
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_LSBFIRST);
     DEV_LOG_DEBUG("SPI bit order set successfully");
     DEV_LOG_DEBUG("Setting SPI data mode to MODE0");
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
