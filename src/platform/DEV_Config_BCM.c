@@ -108,6 +108,7 @@ static void DEV_GPIO_Init(void) {
  * @return 0 on success, nonzero on failure.
  */
 UBYTE DEV_Module_Init(void) {
+    DEV_LOG_INFO("[PLATFORM] Using platform: bcm2835");
     DEV_LOG_INFO("Starting BCM2835 initialization");
     DEV_LOG_DEBUG("Checking GPIO memory access...");
     FILE *gpio_mem = fopen("/dev/gpiomem", "r");

@@ -52,6 +52,7 @@ static void DEV_GPIO_Init(void) {
 }
 
 UBYTE DEV_Module_Init(void) {
+    EPD_LOG_INFO("[PLATFORM] Using platform: waveshare");
     DEV_GPIO_Init();
     DEV_HARDWARE_SPI_begin("/dev/spidev0.0");
     DEV_HARDWARE_SPI_setSpeed(20000000); // 20 MHz as in demo

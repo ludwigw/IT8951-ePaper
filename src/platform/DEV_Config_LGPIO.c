@@ -93,6 +93,7 @@ static void DEV_GPIO_Init(void) {
  * @return 0 on success, nonzero on failure.
  */
 UBYTE DEV_Module_Init(void) {
+    Debug("[PLATFORM] Using platform: lgpio\n");
     Debug("/***********************************/ \r\n");
     char buffer[NUM_MAXBUF];
     FILE *fp;

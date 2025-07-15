@@ -93,6 +93,7 @@ static void DEV_GPIO_Init(void) {
  * @return 0 on success, nonzero on failure.
  */
 UBYTE DEV_Module_Init(void) {
+    DEV_LOG_INFO("[PLATFORM] Using platform: gpiod");
     DEV_LOG_INFO("Initializing GPIOD platform with /dev/spidev0.0");
     GPIOD_Export();
     DEV_GPIO_Init();
