@@ -331,7 +331,7 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
     // Print file size
     fseek(fp, 0, SEEK_END);
     long file_size = ftell(fp);
-    fseek(fp, FileHead.bOffset, SEEK_SET); // Reset to data offset
+    fseek(fp, FileHead.bOffset, SEEK_SET); // Reset to data offset after checking file size
     printf("[DIAG] File size: %ld bytes\n", file_size);
     while ((ret = fread(buf,1,total_length,fp)) >= 0) 
 	{
