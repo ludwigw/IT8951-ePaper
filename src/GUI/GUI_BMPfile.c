@@ -327,19 +327,33 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 	
 	//Bytes per line
     buf = bmp_src_buf;
+    printf("[DIAG] total_length: %llu\n", total_length);
+    // Print file size
+    fseek(fp, 0, SEEK_END);
+    long file_size = ftell(fp);
+    fseek(fp, FileHead.bOffset, SEEK_SET); // Reset to data offset
+    printf("[DIAG] File size: %ld bytes\n", file_size);
     while ((ret = fread(buf,1,total_length,fp)) >= 0) 
 	{
         if (ret == 0) 
 		{
-            DEV_Delay_us(100);
-            continue;
+            printf("[DIAG] fread returned 0, read failed or EOF reached.\n");
+            break;
         }
 		buf = ((UBYTE*)buf) + ret;
         total_length = total_length - ret;
         if(total_length == 0)
             break;
     }
-	
+	printf("[DIAG] Bytes actually read for pixel data: %zu\n", total_length);
+	if (total_length < imageSize) {
+    printf("[DIAG] Error: Only read %llu of %llu bytes of pixel data!\n", total_length, imageSize);
+    fclose(fp);
+    free(bmp_src_buf);
+    free(bmp_dst_buf);
+    return -6;
+}
+
 	//Jump to color pattern board
 	switch(bmp_BitCount)
 	{	
