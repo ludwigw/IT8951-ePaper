@@ -60,23 +60,36 @@ const char* get_imagemagick_cmd() {
  * @param output_path Path for output BMP file
  * @param rotation Rotation in degrees (-90, 0, 90, 180)
  * @param colors Number of colors (16 for grayscale, 256 for color)
+ * @param mirror 1 for horizontal mirroring, 0 for no mirroring
  * @return 0 on success, -1 on failure
  */
-int convert_image_to_bmp(const char *input_path, const char *output_path, int rotation, int colors) {
+int convert_image_to_bmp(const char *input_path, const char *output_path, int rotation, int colors, int mirror) {
     char cmd[MAX_CMD];
     const char* magick_cmd = get_imagemagick_cmd();
     
     // Build ImageMagick command with appropriate settings
     if (colors == 16) {
         // Grayscale conversion with dithering, force 4bpp BMP output
-        snprintf(cmd, sizeof(cmd), 
-            "%s \"%s\" -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 -rotate %d \"%s\"",
-            magick_cmd, input_path, colors, rotation, output_path);
+        if (mirror) {
+            snprintf(cmd, sizeof(cmd), 
+                "%s \"%s\" -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 -rotate %d -flop \"%s\"",
+                magick_cmd, input_path, colors, rotation, output_path);
+        } else {
+            snprintf(cmd, sizeof(cmd), 
+                "%s \"%s\" -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 -rotate %d \"%s\"",
+                magick_cmd, input_path, colors, rotation, output_path);
+        }
     } else {
         // Color conversion (for color e-Paper)
-        snprintf(cmd, sizeof(cmd), 
-            "%s \"%s\" -colors %d -rotate %d \"%s\"",
-            magick_cmd, input_path, colors, rotation, output_path);
+        if (mirror) {
+            snprintf(cmd, sizeof(cmd), 
+                "%s \"%s\" -colors %d -rotate %d -flop \"%s\"",
+                magick_cmd, input_path, colors, rotation, output_path);
+        } else {
+            snprintf(cmd, sizeof(cmd), 
+                "%s \"%s\" -colors %d -rotate %d \"%s\"",
+                magick_cmd, input_path, colors, rotation, output_path);
+        }
     }
     
     printf("Converting image: %s\n", cmd);
@@ -200,20 +213,23 @@ int main(int argc, char *argv[])
         // Determine rotation and colors based on mode
         int rotation = -90; // Default e-Paper rotation
         int colors = 16;    // Default grayscale
-        
+        int mirror = 0;
         if (mode == 3) {
             colors = 256; // Color mode
         }
-        // For modes 1, 2, 6 (horizontal mirroring), we need to flip the image
-        // since the display will mirror it horizontally
-        if (mode == 1 || mode == 2 || mode == 6) {
-            rotation = 90; // Flip horizontally by rotating 90 degrees
+        // For mode 2, enable horizontal mirroring
+        if (mode == 2) {
+            mirror = 1;
+            rotation = 90; // Keep previous logic if needed
+        } else if (mode == 1 || mode == 6) {
+            // Optionally keep mirroring for these modes if desired
+            mirror = 1;
+            rotation = 90;
         }
-        
-        printf("Converting %s to %s (rotation: %d°, colors: %d)...\n", input_path, bmp_path, rotation, colors);
+        printf("Converting %s to %s (rotation: %d°, colors: %d, mirror: %d)...\n", input_path, bmp_path, rotation, colors, mirror);
         
         // Convert the image
-        if (convert_image_to_bmp(input_path, bmp_path, rotation, colors) != 0) {
+        if (convert_image_to_bmp(input_path, bmp_path, rotation, colors, mirror) != 0) {
             fprintf(stderr, "Error: Failed to convert image\n");
             return 2;
         }

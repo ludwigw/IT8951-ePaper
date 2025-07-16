@@ -1106,19 +1106,6 @@ EPD_Config EPD_IT8951_ComputeConfig(UWORD mode) {
     return cfg;
 }
 
-#define USDEF_I80_CMD_LD_IMG_RD 0x0035
-// Read back display memory into buf (length in bytes)
-void EPD_IT8951_ReadImageBuf(UDOUBLE Target_Memory_Addr, UBYTE* buf, UDOUBLE length) {
-    // Set the target memory address (LISAR)
-    EPD_IT8951_SetTargetMemoryAddr(Target_Memory_Addr);
-    // Issue the LD_IMG_RD command
-    EPD_IT8951_WriteCommand(USDEF_I80_CMD_LD_IMG_RD);
-    // Read the data (as bytes)
-    for (UDOUBLE i = 0; i < length; i++) {
-        buf[i] = DEV_SPI_ReadByte();
-    }
-}
-
 int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
     EPD_LOG_INFO("path=%s, VCOM=%d, Mode=%d", path, VCOM, Mode);
     // 1. Initialize the display and get device info
@@ -1185,30 +1172,6 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
             break;
         case 4:
             EPD_IT8951_4bp_Refresh(frame_buf, 0, 0, width, height, false, target_memory_addr, false);
-            // --- Verification step: read back and compare ---
-            {
-                UBYTE* verify_buf = (UBYTE*)malloc(image_size);
-                if (!verify_buf) {
-                    EPD_LOG_ERROR("Out of memory allocating verify buffer");
-                } else {
-                    EPD_IT8951_ReadImageBuf(target_memory_addr, verify_buf, image_size);
-                    int mismatch = 0;
-                    for (UDOUBLE i = 0; i < image_size; ++i) {
-                        if (verify_buf[i] != frame_buf[i]) {
-                            if (mismatch < 16) {
-                                printf("[VERIFY] MISMATCH at byte %llu: sent=0x%02X read=0x%02X\n", (unsigned long long)i, frame_buf[i], verify_buf[i]);
-                            }
-                            mismatch++;
-                        }
-                    }
-                    if (mismatch == 0) {
-                        printf("[VERIFY] Display memory matches buffer!\n");
-                    } else {
-                        printf("[VERIFY] Display memory does NOT match buffer! Mismatches: %d\n", mismatch);
-                    }
-                    free(verify_buf);
-                }
-            }
             break;
         case 8:
             EPD_IT8951_8bp_Refresh(frame_buf, 0, 0, width, height, false, target_memory_addr);
