@@ -327,19 +327,19 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 	
 	//Bytes per line
     buf = bmp_src_buf;
-    printf("[DIAG] total_length: %llu\n", total_length);
+    log_debug("[BMP] total_length: %llu", total_length);
     // Print file size
     fseek(fp, 0, SEEK_END);
     long file_size = ftell(fp);
     fseek(fp, FileHead.bOffset, SEEK_SET); // Reset to data offset after checking file size
-    printf("[DIAG] File size: %ld bytes\n", file_size);
-    printf("[DIAG] FileHead.bOffset: %u\n", FileHead.bOffset);
+    log_debug("[BMP] File size: %ld bytes", file_size);
+    log_debug("[BMP] FileHead.bOffset: %u", FileHead.bOffset);
     fseek(fp, FileHead.bOffset, SEEK_SET);
-    printf("[DIAG] ftell after seek: %ld\n", ftell(fp));
+    log_debug("[BMP] ftell after seek: %ld", ftell(fp));
     size_t bytes_read = fread(bmp_src_buf, 1, total_length, fp);
-    printf("[DIAG] Bytes actually read for pixel data: %zu\n", bytes_read);
+    log_debug("[BMP] Bytes actually read for pixel data: %zu", bytes_read);
     if (bytes_read < total_length) {
-        printf("[DIAG] Error: Only read %zu of %llu bytes of pixel data!\n", bytes_read, total_length);
+        log_warn("[BMP] Error: Only read %zu of %llu bytes of pixel data!", bytes_read, total_length);
         fclose(fp);
         free(bmp_src_buf);
         free(bmp_dst_buf);
@@ -404,32 +404,39 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 		break;
 	}
 
-	printf("[DIAG] BMP biBitCount: %d\n", InfoHead.biBitCount);
-	printf("[DIAG] BMP biWidth: %d\n", InfoHead.biWidth);
-	printf("[DIAG] BMP biHeight: %d\n", InfoHead.biHeight);
+	log_debug("[BMP] BMP biBitCount: %d", InfoHead.biBitCount);
+	log_debug("[BMP] BMP biWidth: %d", InfoHead.biWidth);
+	log_debug("[BMP] BMP biHeight: %d", InfoHead.biHeight);
 	if (InfoHead.biBitCount == 1) {
-    printf("[DIAG] Palette size: 2\n");
-    for (int i = 0; i < 2; ++i) {
-        printf("[DIAG] Palette[%d]: R=%d G=%d B=%d\n", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+        log_trace("[BMP] Palette size: 2");
+        for (int i = 0; i < 2; ++i) {
+            log_trace("[BMP] Palette[%d]: R=%d G=%d B=%d", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+        }
+    } else if (InfoHead.biBitCount == 4) {
+        log_trace("[BMP] Palette size: 16");
+        for (int i = 0; i < 16; ++i) {
+            log_trace("[BMP] Palette[%d]: R=%d G=%d B=%d", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+        }
+    } else if (InfoHead.biBitCount == 8) {
+        log_trace("[BMP] Palette size: 256");
+        for (int i = 0; i < 16; ++i) {
+            log_trace("[BMP] Palette[%d]: R=%d G=%d B=%d", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+        }
     }
-} else if (InfoHead.biBitCount == 4) {
-    printf("[DIAG] Palette size: 16\n");
-    for (int i = 0; i < 16; ++i) {
-        printf("[DIAG] Palette[%d]: R=%d G=%d B=%d\n", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+    log_trace("[BMP] First 64 bytes of BMP pixel data:");
+    char pixel_row[256] = {0};
+    for (int i = 0; i < 64 && i < total_length; ++i) {
+        char buf[8];
+        snprintf(buf, sizeof(buf), "%02X ", bmp_src_buf[i]);
+        strcat(pixel_row, buf);
+        if ((i+1) % 16 == 0) {
+            log_trace("[BMP] %s", pixel_row);
+            pixel_row[0] = '\0';
+        }
     }
-} else if (InfoHead.biBitCount == 8) {
-    printf("[DIAG] Palette size: 256\n");
-    for (int i = 0; i < 16; ++i) {
-        printf("[DIAG] Palette[%d]: R=%d G=%d B=%d\n", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+    if (64 % 16 != 0) {
+        log_trace("[BMP] %s", pixel_row);
     }
-}
-
-	printf("[DIAG] First 64 bytes of BMP pixel data:\n");
-for (int i = 0; i < 64 && i < total_length; ++i) {
-    printf("%02X ", bmp_src_buf[i]);
-    if ((i+1) % 16 == 0) printf("\n");
-}
-printf("\n");
 
 	Bitmap_format_Matrix(bmp_dst_buf,bmp_src_buf);
 	DrawMatrix(x, y,InfoHead.biWidth, InfoHead.biHeight, bmp_dst_buf);
