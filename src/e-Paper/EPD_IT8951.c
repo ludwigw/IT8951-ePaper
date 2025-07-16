@@ -537,9 +537,7 @@ parameter:
 ******************************************************************************/
 static void EPD_IT8951_HostAreaPackedPixelWrite_4bp(IT8951_Load_Img_Info*Load_Img_Info, IT8951_Area_Img_Info*Area_Img_Info, bool Packed_Write)
 {
-    EPD_LOG_DEBUG("HostAreaPackedPixelWrite_4bp: Area %dx%d at (%d,%d), Packed=%d", 
-                  Area_Img_Info->Area_W, Area_Img_Info->Area_H, 
-                  Area_Img_Info->Area_X, Area_Img_Info->Area_Y, Packed_Write);
+    EPD_LOG_DEBUG("[HostAreaPackedPixelWrite_4bp] Entry: Target_Memory_Addr=0x%llX, Area=(%u,%u,%u,%u)", (unsigned long long)Load_Img_Info->Target_Memory_Addr, Area_Img_Info->Area_X, Area_Img_Info->Area_Y, Area_Img_Info->Area_W, Area_Img_Info->Area_H);
     
     UWORD Source_Buffer_Width, Source_Buffer_Height;
     UWORD Source_Buffer_Length;
@@ -665,6 +663,7 @@ parameter:
 ******************************************************************************/
 static void EPD_IT8951_Display_AreaBuf(UWORD X,UWORD Y,UWORD W,UWORD H,UWORD Mode, UDOUBLE Target_Memory_Addr)
 {
+    EPD_LOG_DEBUG("[Display_AreaBuf] Entry: X=%u, Y=%u, W=%u, H=%u, Mode=%u, Target_Memory_Addr=0x%llX", X, Y, W, H, Mode, (unsigned long long)Target_Memory_Addr);
     UWORD Args[7];
     Args[0] = X;
     Args[1] = Y;
@@ -675,6 +674,7 @@ static void EPD_IT8951_Display_AreaBuf(UWORD X,UWORD Y,UWORD W,UWORD H,UWORD Mod
     Args[6] = (UWORD)(Target_Memory_Addr>>16);
     //0x0037
     EPD_IT8951_WriteMultiArg(USDEF_I80_CMD_DPY_BUF_AREA, Args,7); 
+    EPD_LOG_DEBUG("[Display_AreaBuf] Exit");
 }
 
 
@@ -970,7 +970,7 @@ parameter:
 ******************************************************************************/
 void EPD_IT8951_4bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H, bool Hold, UDOUBLE Target_Memory_Addr, bool Packed_Write)
 {
-    EPD_LOG_DEBUG("Starting 4bp refresh: %dx%d at (%d,%d), Hold=%d", W, H, X, Y, Hold);
+    EPD_LOG_DEBUG("[4bp_Refresh] Entry: Frame_Buf=%p, X=%u, Y=%u, W=%u, H=%u, Hold=%d, Target_Memory_Addr=0x%llX, Packed_Write=%d", Frame_Buf, X, Y, W, H, Hold, (unsigned long long)Target_Memory_Addr, Packed_Write);
     IT8951_Load_Img_Info Load_Img_Info;
     IT8951_Area_Img_Info Area_Img_Info;
 
@@ -987,7 +987,7 @@ void EPD_IT8951_4bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H
     Area_Img_Info.Area_W = W;
     Area_Img_Info.Area_H = H;
 
-    EPD_LOG_DEBUG("Calling HostAreaPackedPixelWrite_4bp");
+    EPD_LOG_DEBUG("[4bp_Refresh] Calling HostAreaPackedPixelWrite_4bp with Target_Memory_Addr=0x%llX, Area=(%u,%u,%u,%u)", (unsigned long long)Target_Memory_Addr, X, Y, W, H);
     EPD_IT8951_HostAreaPackedPixelWrite_4bp(&Load_Img_Info, &Area_Img_Info, Packed_Write);
     EPD_LOG_DEBUG("HostAreaPackedPixelWrite_4bp completed");
 
@@ -1003,7 +1003,7 @@ void EPD_IT8951_4bp_Refresh(UBYTE* Frame_Buf, UWORD X, UWORD Y, UWORD W, UWORD H
         EPD_IT8951_Display_AreaBuf(X,Y,W,H, GC16_Mode,Target_Memory_Addr);
         EPD_LOG_DEBUG("Display_AreaBuf completed");
     }
-    EPD_LOG_DEBUG("4bp refresh completed");
+    EPD_LOG_DEBUG("[4bp_Refresh] Exit");
 }
 
 
