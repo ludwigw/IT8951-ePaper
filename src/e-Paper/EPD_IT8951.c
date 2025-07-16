@@ -1115,7 +1115,8 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         return -10; // Failed to init or get panel info
     }
     // Unconditionally clear the panel with INIT_Mode, just like the demo
-    EPD_IT8951_Clear_Refresh(dev_info, 0, INIT_Mode);
+    UDOUBLE target_memory_addr = dev_info.Memory_Addr_L | ((UDOUBLE)dev_info.Memory_Addr_H << 16);
+    EPD_IT8951_Clear_Refresh(dev_info, target_memory_addr, INIT_Mode);
     EPD_LOG_INFO("Initialized display, panel size: %dx%d", dev_info.Panel_W, dev_info.Panel_H);
     EPD_Config cfg = EPD_IT8951_ComputeConfig(Mode);
     Paint_SetRotate(cfg.rotate);
@@ -1154,7 +1155,7 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         free(frame_buf);
         return bmp_result; // Propagate error from BMP loader
     }
-    UDOUBLE target_memory_addr = dev_info.Memory_Addr_L | ((UDOUBLE)dev_info.Memory_Addr_H << 16);
+    // Use the earlier target_memory_addr for the display operation as well
     switch (bits_per_pixel) {
         case 1:
             EPD_IT8951_1bp_Refresh(frame_buf, 0, 0, width, height, Mode, target_memory_addr, false);
