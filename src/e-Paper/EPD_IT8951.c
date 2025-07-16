@@ -100,43 +100,42 @@ parameter:  data
 ******************************************************************************/
 static void EPD_IT8951_WriteData(UWORD Data)
 {
-    // write_data_call_count is now file-scope
     UWORD Write_Preamble = 0x0000;
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): before ReadBusy 1\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): before ReadBusy 1");
     }
     EPD_IT8951_ReadBusy();
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): before CS LOW\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): before CS LOW");
     }
     DEV_Digital_Write(EPD_CS_PIN, LOW);
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): before Write_Preamble\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): before Write_Preamble");
     }
     DEV_SPI_WriteByte(Write_Preamble>>8);
     DEV_SPI_WriteByte(Write_Preamble);
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): before ReadBusy 2\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): before ReadBusy 2");
     }
     EPD_IT8951_ReadBusy();
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): before data bytes\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): before data bytes");
     }
     DEV_SPI_WriteByte(Data>>8);
     DEV_SPI_WriteByte(Data);
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): before CS HIGH\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): before CS HIGH");
     }
     DEV_Digital_Write(EPD_CS_PIN, HIGH);
 
     if (write_data_call_count == 0) {
-        printf("WriteData (first call): done\n"); fflush(stdout);
+        EPD_LOG_TRACE("WriteData (first call): done");
     }
     write_data_call_count++;
 }
@@ -554,10 +553,10 @@ static void EPD_IT8951_HostAreaPackedPixelWrite_4bp(IT8951_Load_Img_Info*Load_Im
     Source_Buffer_Length = Source_Buffer_Width * Source_Buffer_Height;
 
     EPD_LOG_DEBUG("HostAreaPackedPixelWrite_4bp: Area_W=%d, Area_H=%d", Area_Img_Info->Area_W, Area_Img_Info->Area_H);
-    EPD_LOG_DEBUG("First 16 words of buffer:");
-for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
-    EPD_LOG_DEBUG("  buf[%d] = 0x%04X", k, ((UWORD*)Load_Img_Info->Source_Buffer_Addr)[k]);
-}
+    EPD_LOG_TRACE("First 16 words of buffer:");
+    for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
+        EPD_LOG_TRACE("  buf[%d] = 0x%04X", k, ((UWORD*)Load_Img_Info->Source_Buffer_Addr)[k]);
+    }
     
     EPD_LOG_DEBUG("Buffer dimensions: %dx%d, length=%d", Source_Buffer_Width, Source_Buffer_Height, Source_Buffer_Length);
 
@@ -571,8 +570,7 @@ for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
     {
         // Reset the static call counter in EPD_IT8951_WriteData before starting the write loop
         write_data_call_count = 0;
-        printf("Starting write loop: %u x %u = %u words\n", Source_Buffer_Height, Source_Buffer_Width, Source_Buffer_Height * Source_Buffer_Width);
-        fflush(stdout);
+        EPD_LOG_TRACE("Starting write loop: %u x %u = %u words", Source_Buffer_Height, Source_Buffer_Width, Source_Buffer_Height * Source_Buffer_Width);
         UDOUBLE total = Source_Buffer_Height * Source_Buffer_Width;
         UDOUBLE count = 0;
         for(UDOUBLE i=0; i<Source_Buffer_Height; i++)
@@ -580,16 +578,14 @@ for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
             for(UDOUBLE j=0; j<Source_Buffer_Width; j++)
             {
                 if (count % 1024 == 0) {
-                    printf("Write progress: %llu/%llu\n", (unsigned long long)count, (unsigned long long)total);
-                    fflush(stdout);
+                    EPD_LOG_TRACE("Write progress: %llu/%llu", (unsigned long long)count, (unsigned long long)total);
                 }
                 EPD_IT8951_WriteData(*Source_Buffer);
                 Source_Buffer++;
                 count++;
             }
         }
-        printf("Write loop completed\n");
-        fflush(stdout);
+        EPD_LOG_TRACE("Write loop completed");
     }
 
     EPD_LOG_DEBUG("Ending load image");
@@ -1156,12 +1152,11 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         return bmp_result; // Propagate error from BMP loader
     }
     // After loading BMP, before write loop
-    printf("[DEBUG] [EPD] First 64 words of buffer after BMP load:\n");
+    EPD_LOG_TRACE("[EPD] First 64 words of buffer after BMP load:");
     for (int i = 0; i < 64; ++i) {
-        printf("[DEBUG] [EPD]   buf[%d] = 0x%04X\n", i, frame_buf[i]);
+        EPD_LOG_TRACE("  buf[%d] = 0x%04X", i, frame_buf[i]);
     }
-    printf("[DEBUG] [EPD] BMP load result: %d\n", bmp_result);
-    fflush(stdout);
+    EPD_LOG_TRACE("[EPD] BMP load result: %d", bmp_result);
     // Use the earlier target_memory_addr for the display operation as well
     switch (bits_per_pixel) {
         case 1:

@@ -82,32 +82,24 @@ Info:
 ******************************************************************************/
 void DEV_HARDWARE_SPI_begin(char *SPI_device)
 {
-    //device
     int ret = 0; 
     if((hardware_SPI.fd = open(SPI_device, O_RDWR )) < 0)  {
         perror("Failed to open SPI device.\n");  
         DEV_LOG_ERROR("Failed to open SPI device");
-        DEV_HARDWARE_SPI_Debug("Failed to open SPI device\r\n");
         exit(1); 
     } else {
         DEV_LOG_DEBUG("Opened SPI device: %s", SPI_device);
-        DEV_HARDWARE_SPI_Debug("open : %s\r\n", SPI_device);
     }
     hardware_SPI.mode = 0;
-    
     ret = ioctl(hardware_SPI.fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
     if (ret == -1) {
         DEV_LOG_WARN("Can't set bits per word");
-        DEV_HARDWARE_SPI_Debug("can't set bits per word\r\n"); 
     }
- 
     ret = ioctl(hardware_SPI.fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
     if (ret == -1) {
         DEV_LOG_WARN("Can't get bits per word");
-        DEV_HARDWARE_SPI_Debug("can't get bits per word\r\n"); 
     }
     tr.bits_per_word = bits;
-    
     DEV_HARDWARE_SPI_Mode(SPI_MODE_0);
     DEV_HARDWARE_SPI_ChipSelect(SPI_CS_Mode_LOW);
     DEV_HARDWARE_SPI_SetBitOrder(SPI_BIT_ORDER_LSBFIRST);
@@ -117,26 +109,20 @@ void DEV_HARDWARE_SPI_begin(char *SPI_device)
 
 void DEV_HARDWARE_SPI_beginSet(char *SPI_device, SPIMode mode, uint32_t speed)
 {
-    //device
     int ret = 0; 
     hardware_SPI.mode = 0;
     if((hardware_SPI.fd = open(SPI_device, O_RDWR )) < 0)  {
         perror("Failed to open SPI device.\n");  
         exit(1); 
-    } else {
-        DEV_HARDWARE_SPI_Debug("open : %s\r\n", SPI_device);
     }
-    
     ret = ioctl(hardware_SPI.fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
     if (ret == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set bits per word\r\n"); 
+        DEV_LOG_WARN("Can't set bits per word");
     }
- 
     ret = ioctl(hardware_SPI.fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
     if (ret == -1) {
-        DEV_HARDWARE_SPI_Debug("can't get bits per word\r\n"); 
+        DEV_LOG_WARN("Can't get bits per word");
     }
-
     DEV_HARDWARE_SPI_Mode(mode);
     DEV_HARDWARE_SPI_ChipSelect(SPI_CS_Mode_LOW);
     DEV_HARDWARE_SPI_setSpeed(speed);
@@ -153,7 +139,7 @@ void DEV_HARDWARE_SPI_end(void)
 {
     hardware_SPI.mode = 0;
     if (close(hardware_SPI.fd) != 0){
-        DEV_HARDWARE_SPI_Debug("Failed to close SPI device\r\n");
+        DEV_LOG_WARN("Failed to close SPI device");
         perror("Failed to close SPI device.\n");  
     }
 }
@@ -172,14 +158,14 @@ int DEV_HARDWARE_SPI_setSpeed(uint32_t speed)
 
     //Write speed
     if (ioctl(hardware_SPI.fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set max speed hz\r\n"); 
+        DEV_LOG_WARN("Can't set max speed hz");
         hardware_SPI.speed = speed1;//Setting failure rate unchanged
         return -1;
     }
     
     //Read the speed of just writing
     if (ioctl(hardware_SPI.fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed) == -1) {
-        DEV_HARDWARE_SPI_Debug("can't get max speed hz\r\n"); 
+        DEV_LOG_WARN("Can't get max speed hz");
         hardware_SPI.speed = speed1;//Setting failure rate unchanged
         return -1;
     }
@@ -208,7 +194,7 @@ int DEV_HARDWARE_SPI_Mode(SPIMode mode)
     
     //Write device
     if (ioctl(hardware_SPI.fd, SPI_IOC_WR_MODE, &hardware_SPI.mode) == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set spi mode\r\n"); 
+        DEV_LOG_WARN("Can't set spi mode");
         return -1;
     }
     return 1;
@@ -234,7 +220,7 @@ int DEV_HARDWARE_SPI_CSEN(SPICSEN EN)
     }
     //Write device
     if (ioctl(hardware_SPI.fd, SPI_IOC_WR_MODE, &hardware_SPI.mode) == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set spi CS EN\r\n"); 
+        DEV_LOG_WARN("Can't set spi CS EN");
         return -1;
     }
     return 1;
@@ -257,7 +243,7 @@ int DEV_HARDWARE_SPI_ChipSelect(SPIChipSelect CS_Mode)
     if(CS_Mode == SPI_CS_Mode_HIGH){
         hardware_SPI.mode |= SPI_CS_HIGH;
         hardware_SPI.mode &= ~SPI_NO_CS;
-        DEV_HARDWARE_SPI_Debug("CS HIGH \r\n");
+        DEV_LOG_TRACE("CS HIGH");
     }else if(CS_Mode == SPI_CS_Mode_LOW){
         hardware_SPI.mode &= ~SPI_CS_HIGH;
         hardware_SPI.mode &= ~SPI_NO_CS;
@@ -266,7 +252,7 @@ int DEV_HARDWARE_SPI_ChipSelect(SPIChipSelect CS_Mode)
     }
     
     if (ioctl(hardware_SPI.fd, SPI_IOC_WR_MODE, &hardware_SPI.mode) == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set spi mode\r\n"); 
+        DEV_LOG_WARN("Can't set spi mode");
         return -1;
     }
     return 1;
@@ -287,17 +273,17 @@ int DEV_HARDWARE_SPI_SetBitOrder(SPIBitOrder Order)
 {
     if(Order == SPI_BIT_ORDER_LSBFIRST){
         hardware_SPI.mode |= SPI_LSB_FIRST;
-        DEV_HARDWARE_SPI_Debug("SPI_LSB_FIRST\r\n");
+        DEV_LOG_TRACE("SPI_LSB_FIRST");
     }else if(Order == SPI_BIT_ORDER_MSBFIRST){
         hardware_SPI.mode &= ~SPI_LSB_FIRST;
-        DEV_HARDWARE_SPI_Debug("SPI_MSB_FIRST\r\n");
+        DEV_LOG_TRACE("SPI_MSB_FIRST");
     }
     
     // DEV_HARDWARE_SPI_Debug("hardware_SPI.mode = 0x%02x\r\n", hardware_SPI.mode);
     int fd = ioctl(hardware_SPI.fd, SPI_IOC_WR_MODE, &hardware_SPI.mode);
-    DEV_HARDWARE_SPI_Debug("fd = %d\r\n",fd);
+    DEV_LOG_TRACE("fd = %d",fd);
     if (fd == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set spi SPI_LSB_FIRST\r\n"); 
+        DEV_LOG_WARN("Can't set spi SPI_LSB_FIRST");
         return -1;
     }
     return 1;
@@ -322,7 +308,7 @@ int DEV_HARDWARE_SPI_SetBusMode(BusMode mode)
         hardware_SPI.mode &= ~SPI_3WIRE;
     }
     if (ioctl(hardware_SPI.fd, SPI_IOC_WR_MODE, &hardware_SPI.mode) == -1) {
-        DEV_HARDWARE_SPI_Debug("can't set spi mode\r\n"); 
+        DEV_LOG_WARN("Can't set spi mode");
         return -1;
     }
     return 1;
@@ -356,7 +342,7 @@ uint8_t DEV_HARDWARE_SPI_TransferByte(uint8_t buf)
     
     //ioctl Operation, transmission of data
     if ( ioctl(hardware_SPI.fd, SPI_IOC_MESSAGE(1), &tr) < 1 ) {
-        DEV_HARDWARE_SPI_Debug("can't send spi message\r\n"); 
+        DEV_LOG_WARN("Can't send spi message");
     }
     return rbuf[0];
 }
@@ -374,7 +360,7 @@ int DEV_HARDWARE_SPI_Transfer(uint8_t *buf, uint32_t len)
     
     //ioctl Operation, transmission of data
     if (ioctl(hardware_SPI.fd, SPI_IOC_MESSAGE(1), &tr)  < 1 ){  
-        DEV_HARDWARE_SPI_Debug("can't send spi message\r\n"); 
+        DEV_LOG_WARN("Can't send spi message");
         return -1;
     }
     
