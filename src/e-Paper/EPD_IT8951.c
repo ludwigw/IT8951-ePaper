@@ -60,29 +60,11 @@ static void EPD_IT8951_ReadBusy(void)
     EPD_LOG_TRACE("ReadBusy: Checking BUSY pin");
     UBYTE Busy_State = DEV_Digital_Read(EPD_BUSY_PIN);
     EPD_LOG_TRACE("ReadBusy: Initial state = %d", Busy_State);
-    
     //0: busy, 1: idle
-    int timeout = 0;
-    const int max_timeout = 5000; // 5 second timeout
-    
     while(Busy_State == 0) {
         Busy_State = DEV_Digital_Read(EPD_BUSY_PIN);
-        timeout++;
-        if (timeout > max_timeout) {
-            EPD_LOG_ERROR("ReadBusy timeout - BUSY pin stuck at LOW for %d ms", timeout);
-            break;
-        }
-        if (timeout % 1000 == 0) {
-            EPD_LOG_WARN("ReadBusy: Still busy after %d ms", timeout);
-        }
-        usleep(1000); // Sleep 1ms to avoid busy-waiting
     }
-    
-    if (timeout <= max_timeout) {
-        EPD_LOG_TRACE("ReadBusy: Released after %d ms", timeout);
-    } else {
-        EPD_LOG_ERROR("ReadBusy: Display stuck in busy state - may need reset");
-    }
+    EPD_LOG_TRACE("ReadBusy: Released");
 }
 
 
