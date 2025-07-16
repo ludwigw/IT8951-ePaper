@@ -116,22 +116,29 @@ parameter:  data
 ******************************************************************************/
 static void EPD_IT8951_WriteData(UWORD Data)
 {
-    //Set Preamble for Write Command
-	UWORD Write_Preamble = 0x0000;
+    UWORD Write_Preamble = 0x0000;
 
+    printf("WriteData: before ReadBusy 1\n"); fflush(stdout);
     EPD_IT8951_ReadBusy();
 
+    printf("WriteData: before CS LOW\n"); fflush(stdout);
     DEV_Digital_Write(EPD_CS_PIN, LOW);
 
-	DEV_SPI_WriteByte(Write_Preamble>>8);
-	DEV_SPI_WriteByte(Write_Preamble);
+    printf("WriteData: before Write_Preamble\n"); fflush(stdout);
+    DEV_SPI_WriteByte(Write_Preamble>>8);
+    DEV_SPI_WriteByte(Write_Preamble);
 
+    printf("WriteData: before ReadBusy 2\n"); fflush(stdout);
     EPD_IT8951_ReadBusy();
 
-	DEV_SPI_WriteByte(Data>>8);
-	DEV_SPI_WriteByte(Data);
+    printf("WriteData: before data bytes\n"); fflush(stdout);
+    DEV_SPI_WriteByte(Data>>8);
+    DEV_SPI_WriteByte(Data);
 
+    printf("WriteData: before CS HIGH\n"); fflush(stdout);
     DEV_Digital_Write(EPD_CS_PIN, HIGH);
+
+    printf("WriteData: done\n"); fflush(stdout);
 }
 
 
