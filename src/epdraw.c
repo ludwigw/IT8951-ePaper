@@ -68,9 +68,9 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
     
     // Build ImageMagick command with appropriate settings
     if (colors == 16) {
-        // Grayscale conversion with dithering (like original script)
+        // Grayscale conversion with dithering, force 4bpp BMP output
         snprintf(cmd, sizeof(cmd), 
-            "%s \"%s\" -colors %d -dither FloydSteinberg -colorspace Gray -rotate %d \"%s\"",
+            "%s \"%s\" -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 -rotate %d \"%s\"",
             magick_cmd, input_path, colors, rotation, output_path);
     } else {
         // Color conversion (for color e-Paper)
