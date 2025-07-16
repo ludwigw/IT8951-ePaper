@@ -1155,6 +1155,13 @@ int EPD_IT8951_DisplayBMP(const char *path, UWORD VCOM, UWORD Mode) {
         free(frame_buf);
         return bmp_result; // Propagate error from BMP loader
     }
+    // After loading BMP, before write loop
+    printf("[DEBUG] [EPD] First 64 words of buffer after BMP load:\n");
+    for (int i = 0; i < 64; ++i) {
+        printf("[DEBUG] [EPD]   buf[%d] = 0x%04X\n", i, frame_buf[i]);
+    }
+    printf("[DEBUG] [EPD] BMP load result: %d\n", bmp_result);
+    fflush(stdout);
     // Use the earlier target_memory_addr for the display operation as well
     switch (bits_per_pixel) {
         case 1:
