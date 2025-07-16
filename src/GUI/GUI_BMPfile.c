@@ -333,26 +333,18 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
     long file_size = ftell(fp);
     fseek(fp, FileHead.bOffset, SEEK_SET); // Reset to data offset after checking file size
     printf("[DIAG] File size: %ld bytes\n", file_size);
-    while ((ret = fread(buf,1,total_length,fp)) >= 0) 
-	{
-        if (ret == 0) 
-		{
-            printf("[DIAG] fread returned 0, read failed or EOF reached.\n");
-            break;
-        }
-		buf = ((UBYTE*)buf) + ret;
-        total_length = total_length - ret;
-        if(total_length == 0)
-            break;
+    printf("[DIAG] FileHead.bOffset: %u\n", FileHead.bOffset);
+    fseek(fp, FileHead.bOffset, SEEK_SET);
+    printf("[DIAG] ftell after seek: %ld\n", ftell(fp));
+    size_t bytes_read = fread(bmp_src_buf, 1, total_length, fp);
+    printf("[DIAG] Bytes actually read for pixel data: %zu\n", bytes_read);
+    if (bytes_read < total_length) {
+        printf("[DIAG] Error: Only read %zu of %llu bytes of pixel data!\n", bytes_read, total_length);
+        fclose(fp);
+        free(bmp_src_buf);
+        free(bmp_dst_buf);
+        return -6;
     }
-	printf("[DIAG] Bytes actually read for pixel data: %zu\n", total_length);
-	if (total_length < imageSize) {
-    printf("[DIAG] Error: Only read %llu of %llu bytes of pixel data!\n", total_length, imageSize);
-    fclose(fp);
-    free(bmp_src_buf);
-    free(bmp_dst_buf);
-    return -6;
-}
 
 	//Jump to color pattern board
 	switch(bmp_BitCount)
