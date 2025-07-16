@@ -398,6 +398,33 @@ int GUI_ReadBmp(const char *path, UWORD x, UWORD y)
 		break;
 	}
 
+	printf("[DIAG] BMP biBitCount: %d\n", InfoHead.biBitCount);
+	printf("[DIAG] BMP biWidth: %d\n", InfoHead.biWidth);
+	printf("[DIAG] BMP biHeight: %d\n", InfoHead.biHeight);
+	if (InfoHead.biBitCount == 1) {
+    printf("[DIAG] Palette size: 2\n");
+    for (int i = 0; i < 2; ++i) {
+        printf("[DIAG] Palette[%d]: R=%d G=%d B=%d\n", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+    }
+} else if (InfoHead.biBitCount == 4) {
+    printf("[DIAG] Palette size: 16\n");
+    for (int i = 0; i < 16; ++i) {
+        printf("[DIAG] Palette[%d]: R=%d G=%d B=%d\n", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+    }
+} else if (InfoHead.biBitCount == 8) {
+    printf("[DIAG] Palette size: 256\n");
+    for (int i = 0; i < 16; ++i) {
+        printf("[DIAG] Palette[%d]: R=%d G=%d B=%d\n", i, palette[i].rgbRed, palette[i].rgbGreen, palette[i].rgbBlue);
+    }
+}
+
+	printf("[DIAG] First 64 bytes of BMP pixel data:\n");
+for (int i = 0; i < 64 && i < total_length; ++i) {
+    printf("%02X ", bmp_src_buf[i]);
+    if ((i+1) % 16 == 0) printf("\n");
+}
+printf("\n");
+
 	Bitmap_format_Matrix(bmp_dst_buf,bmp_src_buf);
 	DrawMatrix(x, y,InfoHead.biWidth, InfoHead.biHeight, bmp_dst_buf);
 
