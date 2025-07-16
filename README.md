@@ -25,36 +25,37 @@ See the [`/docs`](./docs) directory for detailed guides and troubleshooting.
 > 
 > This includes step-by-step instructions, architecture overview, and troubleshooting tips for common hacks and issues.
 
-## ⚠️ Platform Backends: BCM Library vs. Custom IOCTL (Waveshare) — Why This Matters
+## ⚠️ Platform Backends: BCM Library, LGPIO, GPIOD — Why This Matters
 
 This library supports multiple hardware backends for controlling the e-Paper display, and **choosing the correct one is critical for your hardware to work reliably.**
 
 ### Background: The Confusion
 - **BCM Backend:** Uses the `bcm2835` library, which is a popular C library for Raspberry Pi GPIO and SPI. It relies on the Pi's hardware SPI and GPIO subsystems, and is easy to use for most Pi projects.
-- **Waveshare (Custom IOCTL) Backend:** The official Waveshare demo code does **not** use the bcm2835 library. Instead, it directly controls SPI and GPIO using Linux `ioctl` calls and the `gpiod` library. This gives it more precise control over chip select (CS), timing, and inter-byte delays, which are sometimes required for the IT8951 controller to work correctly.
+- **LGPIO Backend:** For Raspberry Pi 5 or newer OSes, uses the `lgpio` library for GPIO/SPI access.
+- **GPIOD Backend:** For Jetson Nano, some newer Linux SBCs, or if you want to use the Linux GPIO character device interface. Advanced/experimental.
 
 ### Why Does This Matter?
 - Some e-Paper panels (especially the 10.3" D variant) are **very sensitive to SPI timing and CS line handling**.
-- The BCM backend may not work on all hardware, because it cannot control inter-byte delays or manually toggle CS between bytes/commands.
-- The Waveshare backend matches the official demo's low-level logic, and is more likely to work on all hardware, but is more complex and requires additional dependencies (`libgpiod-dev`).
+- The BCM backend works for most Pi models and Waveshare panels.
+- The LGPIO and GPIOD backends are for advanced users or special hardware.
 
 ### How to Choose
 - **Default:** The Makefile uses `PLATFORM=BCM` by default for compatibility.
-- **If you have display update or BUSY pin issues:** Try building with `PLATFORM=WAVESHARE`:
+- **If you have display update or BUSY pin issues:** Try building with `PLATFORM=LGPIO` or `PLATFORM=GPIOD`:
   ```sh
-  make bin/epdraw PLATFORM=WAVESHARE
+  make bin/epdraw PLATFORM=LGPIO
+  make bin/epdraw PLATFORM=GPIOD
   ```
-- This will use the custom IOCTL/gpiod backend, matching the official Waveshare demo logic.
+- This will use the appropriate backend for your hardware.
 
 ### What Actually Happens
-- The Makefile and codebase will only include one backend at a time (BCM, LGPIO, GPIOD, or WAVESHARE).
+- The Makefile and codebase will only include one backend at a time (BCM, LGPIO, or GPIOD).
 - The CLI and library will link against the correct platform-specific code for SPI and GPIO.
-- If you use the WAVESHARE backend, you must have `libgpiod-dev` installed (the Dockerfile now includes this).
 
-### Why Both?
+### Why Multiple Backends?
 - The BCM backend is simpler and works for most Pi models and Waveshare panels.
-- The WAVESHARE backend is for advanced users, hardware debugging, or when the BCM backend fails due to timing/CS issues.
-- This dual-backend approach is necessary because the IT8951 controller is very sensitive to low-level hardware details, and the official demo code is the only known-good reference for some panels.
+- The LGPIO and GPIOD backends are for advanced users, hardware debugging, or when the BCM backend fails due to timing/CS issues.
+- This multi-backend approach is necessary because the IT8951 controller is very sensitive to low-level hardware details, and the official demo code is the only known-good reference for some panels.
 
 ---
 

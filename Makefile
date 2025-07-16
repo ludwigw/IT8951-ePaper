@@ -1,5 +1,6 @@
 # Enhanced Makefile for IT8951-ePaper library and examples (robust object mapping, fixed foreach)
 
+# Remove WAVESHARE platform support
 # Platform selection: one of BCM, LGPIO, GPIOD (default: BCM)
 PLATFORM ?= BCM
 
@@ -20,13 +21,8 @@ LDFLAGS =
 PLATFORM_SRC_BCM = src/platform/DEV_Config_BCM.c
 PLATFORM_SRC_LGPIO = src/platform/DEV_Config_LGPIO.c
 PLATFORM_SRC_GPIOD = src/platform/DEV_Config_GPIOD.c
-PLATFORM_SRC_WAVESHARE = src/platform/DEV_Config_WAVESHARE.c
 
-ifeq ($(PLATFORM),WAVESHARE)
-PLATFORM_SRC = $(PLATFORM_SRC_WAVESHARE)
-PLATFORM_DEFS = -DBCM=0 -DLGPIO=0 -DGPIOD=0
-PLATFORM_LIBS = -lgpiod
-else ifeq ($(PLATFORM),BCM)
+ifeq ($(PLATFORM),BCM)
 PLATFORM_SRC = $(PLATFORM_SRC_BCM)
 PLATFORM_DEFS = -DBCM=1 -DLGPIO=0 -DGPIOD=0
 PLATFORM_LIBS = -lbcm2835
