@@ -12,6 +12,7 @@
 #include "EPD_IT8951.h"
 #include <time.h>
 #include <stdlib.h> // Added for getenv
+#include <stdio.h> // Added for printf and fflush
 
 // External variables for display configuration
 extern UBYTE isColor;
@@ -563,16 +564,25 @@ for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
     }
     else
     {
-        EPD_LOG_DEBUG("Using individual writes for %dx%d pixels", Source_Buffer_Width, Source_Buffer_Height);
+        printf("Starting write loop: %u x %u = %u words\n", Source_Buffer_Height, Source_Buffer_Width, Source_Buffer_Height * Source_Buffer_Width);
+        fflush(stdout);
+        UDOUBLE total = Source_Buffer_Height * Source_Buffer_Width;
+        UDOUBLE count = 0;
         for(UDOUBLE i=0; i<Source_Buffer_Height; i++)
         {
             for(UDOUBLE j=0; j<Source_Buffer_Width; j++)
             {
+                if (count % 1024 == 0) {
+                    printf("Write progress: %llu/%llu\n", (unsigned long long)count, (unsigned long long)total);
+                    fflush(stdout);
+                }
                 EPD_IT8951_WriteData(*Source_Buffer);
                 Source_Buffer++;
+                count++;
             }
         }
-        EPD_LOG_DEBUG("Individual writes completed");
+        printf("Write loop completed\n");
+        fflush(stdout);
     }
 
     EPD_LOG_DEBUG("Ending load image");
