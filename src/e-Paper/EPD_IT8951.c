@@ -26,6 +26,8 @@ UBYTE GC16_Mode = 2;
 //A2_Mode's value is not fixed, is decide by firmware's LUT 
 UBYTE A2_Mode = 6;
 
+static int write_data_call_count = 0;
+
 /******************************************************************************
 function :	Software reset
 parameter:
@@ -116,7 +118,7 @@ parameter:  data
 ******************************************************************************/
 static void EPD_IT8951_WriteData(UWORD Data)
 {
-    static int write_data_call_count = 0;
+    // write_data_call_count is now file-scope
     UWORD Write_Preamble = 0x0000;
 
     if (write_data_call_count == 0) {
@@ -587,6 +589,8 @@ for (int k = 0; k < 16 && k < Source_Buffer_Width * Source_Buffer_Height; k++) {
     }
     else
     {
+        // Reset the static call counter in EPD_IT8951_WriteData before starting the write loop
+        write_data_call_count = 0;
         printf("Starting write loop: %u x %u = %u words\n", Source_Buffer_Height, Source_Buffer_Width, Source_Buffer_Height * Source_Buffer_Width);
         fflush(stdout);
         UDOUBLE total = Source_Buffer_Height * Source_Buffer_Width;
