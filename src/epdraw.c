@@ -256,7 +256,10 @@ int main(int argc, char *argv[])
     int result = EPD_IT8951_DisplayBMP(bmp_path, vcom, mode);
     if (result == 0) {
         printf("Image displayed successfully!\n");
-        
+        // E-paper displays need time to physically update.
+        // If the program exits or powers down the panel too quickly after sending the image, the update may not complete.
+        // The delay ensures the panel has time to finish the refresh before any shutdown or further commands.
+        DEV_Delay_ms(5000);
         // Clean up temporary BMP file if we created it
         if (need_conversion) {
             printf("Cleaning up temporary file: %s\n", bmp_path);
