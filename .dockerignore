@@ -1,0 +1,9 @@
+bin/
+tests/test_*
+tests/*.dSYM
+!tests/test_*.c
+!tests/*.h
+!tests/Makefile
+!tests/README.md
+!tests/mock_*.c
+!tests/assets/ 

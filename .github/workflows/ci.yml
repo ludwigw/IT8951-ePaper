@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [BCM, LGPIO, GPIOD]
+        include:
+          - platform: BCM
+            deps: libbcm2835-dev
+          - platform: LGPIO
+            deps: liblgpio-dev
+          - platform: GPIOD
+            deps: libgpiod-dev
+    env:
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install platform dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.deps }}
+
+      - name: Build library and CLI for ${{ matrix.platform }}
+        run: |
+          make clean
+          make bin/epdraw PLATFORM=${{ matrix.platform }}
+
+      - name: Build and run platform-agnostic tests for ${{ matrix.platform }}
+        run: |
+          make -C tests clean
+          make -C tests PLATFORM=${{ matrix.platform }}
+          make -C tests run
+
+      - name: Note about platform-specific tests
+        run: |
+          echo "Platform-specific tests (hardware abstraction) are only meaningful on real hardware."
+          echo "In CI, only platform-agnostic tests are run. Platform-specific tests are skipped or print a message." 
