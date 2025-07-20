@@ -184,6 +184,41 @@ gdb tests/test_cli
 ldd tests/test_cli
 ```
 
+## Running Tests in Docker (Recommended)
+
+To ensure a consistent environment and avoid local dependency issues, it is recommended to run all tests in Docker. This matches the CI setup and works on any platform (Linux, macOS, Windows).
+
+### Quick Start
+
+1. **Build and run the test container:**
+
+   ```sh
+   ./docker-test.sh
+   ```
+   This will build the Docker image, mount your current workspace, and drop you into a shell inside the container.
+
+2. **Run all tests inside Docker:**
+
+   ```sh
+   make test
+   # or for verbose output
+   make -C tests run
+   ```
+
+### What this does
+- Uses the provided `Dockerfile` to install all dependencies (build tools, libraries, etc.).
+- Mounts your current project directory into the container for live code access.
+- Ensures tests run in a clean, reproducible environment matching CI.
+
+### Notes
+- You can also run specific tests or build targets as needed inside the container.
+- The default command in the Dockerfile is `make -C tests run`, so if you just want to run all tests, you can also do:
+  ```sh
+  docker build -t it8951-epaper-test .
+  docker run --rm -it -v "$(pwd)":/workspace it8951-epaper-test
+  ```
+- For hardware/platform-specific tests, you must run on real hardware (see above).
+
 ---
 
 For more information, see the test source files in the `tests/` directory and the test README. 

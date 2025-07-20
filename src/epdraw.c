@@ -117,9 +117,25 @@ int main(int argc, char *argv[])
         else log_level = LOG_LEVEL_WARN;
         log_init(log_level);
     }
-    
+
+    // --- Parse --stay-awake flag ---
+    int stay_awake = 0;
+    int arg_offset = 0;
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--stay-awake") == 0) {
+            stay_awake = 1;
+            // Remove the flag from argv for positional parsing
+            for (int j = i; j < argc - 1; ++j) {
+                argv[j] = argv[j + 1];
+            }
+            argc--;
+            break;
+        }
+    }
+
     if (argc < 2 || (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0))) {
-        printf("Usage: epdraw <image_path> [vcom] [mode]\n");
+        printf("Usage: epdraw [--stay-awake] <image_path> [vcom] [mode]\n");
+        printf("  [--stay-awake]: Do not put the display to sleep after update (default: sleep after update)\n");
         printf("  <image_path>: Path to image file (any format: PNG, JPG, BMP, etc. - will be auto-converted)\n");
         printf("  [vcom]: VCOM voltage (default: 0, use panel default)\n");
         printf("          Can be integer (2510) or float (-1.18V)\n");
@@ -137,7 +153,7 @@ int main(int argc, char *argv[])
         printf("  - Color vs grayscale mode\n");
         printf("\nExamples:\n");
         printf("  epdraw photo.jpg                    # Any image format, auto-converted and displayed\n");
-        printf("  epdraw photo.png -1.18 2            # Custom VCOM (-1.18V) and mode\n");
+        printf("  epdraw --stay-awake photo.png -1.18 2 # Custom VCOM (-1.18V), mode, and stay awake\n");
         printf("  epdraw image.bmp                    # Direct BMP display (no conversion needed)\n");
         return 1;
     }
@@ -261,7 +277,13 @@ int main(int argc, char *argv[])
         // If the program exits or powers down the panel too quickly after sending the image, the update may not complete.
         // The delay ensures the panel has time to finish the refresh before any shutdown or further commands.
         DEV_Delay_ms(5000);
-        // Clean up temporary BMP file if we created it
+        if (!stay_awake) {
+            printf("Putting display to sleep...\n");
+            EPD_IT8951_Sleep();
+        } else {
+            printf("Leaving display awake (per --stay-awake flag)\n");
+        }
+         // Clean up temporary BMP file if we created it
         if (need_conversion) {
             printf("Cleaning up temporary file: %s\n", bmp_path);
             unlink(bmp_path);
