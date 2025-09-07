@@ -79,11 +79,11 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
         printf("Phase 1: Geometric processing...\n");
         if (mirror) {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d -flop \"%s\"",
+                "%s \"%s\" -limit memory 128MB -limit map 256MB -define registry:temporary-path=/tmp -rotate %d -flop \"%s\"",
                 magick_cmd, input_path, rotation, temp_path);
         } else {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d \"%s\"",
+                "%s \"%s\" -limit memory 128MB -limit map 256MB -define registry:temporary-path=/tmp -rotate %d \"%s\"",
                 magick_cmd, input_path, rotation, temp_path);
         }
         
@@ -98,7 +98,7 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
         // Phase 2: Color operations with memory limits (ImageMagick 6.x compatible)
         printf("Phase 2: Color processing (memory-limited mode)...\n");
         snprintf(cmd, sizeof(cmd), 
-            "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 \"%s\"",
+            "%s \"%s\" -limit memory 128MB -limit map 256MB -define registry:temporary-path=/tmp -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 \"%s\"",
             magick_cmd, temp_path, colors, output_path);
         
         printf("Converting image (Phase 2): %s\n", cmd);
@@ -118,11 +118,11 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
         printf("Converting color image (single phase with memory limits)...\n");
         if (mirror) {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -rotate %d -flop \"%s\"",
+                "%s \"%s\" -limit memory 128MB -limit map 256MB -define registry:temporary-path=/tmp -colors %d -rotate %d -flop \"%s\"",
                 magick_cmd, input_path, colors, rotation, output_path);
         } else {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -rotate %d \"%s\"",
+                "%s \"%s\" -limit memory 128MB -limit map 256MB -define registry:temporary-path=/tmp -colors %d -rotate %d \"%s\"",
                 magick_cmd, input_path, colors, rotation, output_path);
         }
         
