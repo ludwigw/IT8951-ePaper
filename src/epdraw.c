@@ -56,7 +56,8 @@ const char* get_imagemagick_cmd() {
 
 /**
  * @brief Convert any image to BMP format suitable for e-Paper display
- * Memory-optimized version that splits conversion into two phases to reduce peak memory usage.
+ * Memory-optimized version compatible with ImageMagick 6.x (Raspberry Pi systems).
+ * Uses memory limits and two-phase conversion to reduce peak memory usage.
  * @param input_path Path to input image (any format supported by ImageMagick)
  * @param output_path Path for output BMP file
  * @param rotation Rotation in degrees (-90, 0, 90, 180)
@@ -74,10 +75,10 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
     snprintf(temp_path, sizeof(temp_path), "%s.temp", output_path);
     
     if (colors == 16) {
-        // Phase 1: Streaming color operations (memory-intensive but streamable)
-        printf("Phase 1: Color processing (streaming mode)...\n");
+        // Phase 1: Color operations with memory limits (ImageMagick 6.x compatible)
+        printf("Phase 1: Color processing (memory-limited mode)...\n");
         snprintf(cmd, sizeof(cmd), 
-            "%s \"%s\" -stream -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 \"%s\"",
+            "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 \"%s\"",
             magick_cmd, input_path, colors, temp_path);
         
         printf("Converting image (Phase 1): %s\n", cmd);
@@ -88,15 +89,15 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
             return -1;
         }
         
-        // Phase 2: Geometric operations (less memory-intensive, but needs full image)
+        // Phase 2: Geometric operations with memory limits
         printf("Phase 2: Geometric processing...\n");
         if (mirror) {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -rotate %d -flop \"%s\"",
+                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d -flop \"%s\"",
                 magick_cmd, temp_path, rotation, output_path);
         } else {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -rotate %d \"%s\"",
+                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d \"%s\"",
                 magick_cmd, temp_path, rotation, output_path);
         }
         
@@ -110,18 +111,18 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
         
         // Cleanup temporary file
         unlink(temp_path);
-        printf("Image conversion completed successfully (memory-optimized)\n");
+        printf("Image conversion completed successfully (memory-optimized for ImageMagick 6.x)\n");
         
     } else {
-        // Color conversion (for color e-Paper) - single phase as it's less memory intensive
-        printf("Converting color image (single phase)...\n");
+        // Color conversion (for color e-Paper) - single phase with memory limits
+        printf("Converting color image (single phase with memory limits)...\n");
         if (mirror) {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -colors %d -rotate %d -flop \"%s\"",
+                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -rotate %d -flop \"%s\"",
                 magick_cmd, input_path, colors, rotation, output_path);
         } else {
             snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -colors %d -rotate %d \"%s\"",
+                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -rotate %d \"%s\"",
                 magick_cmd, input_path, colors, rotation, output_path);
         }
         
