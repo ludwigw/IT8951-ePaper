@@ -75,11 +75,17 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
     snprintf(temp_path, sizeof(temp_path), "%s.temp", output_path);
     
     if (colors == 16) {
-        // Phase 1: Color operations with memory limits (ImageMagick 6.x compatible)
-        printf("Phase 1: Color processing (memory-limited mode)...\n");
-        snprintf(cmd, sizeof(cmd), 
-            "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 \"%s\"",
-            magick_cmd, input_path, colors, temp_path);
+        // Phase 1: Geometric operations first (rotation, mirroring) - less memory intensive
+        printf("Phase 1: Geometric processing...\n");
+        if (mirror) {
+            snprintf(cmd, sizeof(cmd), 
+                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d -flop \"%s\"",
+                magick_cmd, input_path, rotation, temp_path);
+        } else {
+            snprintf(cmd, sizeof(cmd), 
+                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d \"%s\"",
+                magick_cmd, input_path, rotation, temp_path);
+        }
         
         printf("Converting image (Phase 1): %s\n", cmd);
         result = system(cmd);
@@ -89,17 +95,11 @@ int convert_image_to_bmp(const char *input_path, const char *output_path, int ro
             return -1;
         }
         
-        // Phase 2: Geometric operations with memory limits
-        printf("Phase 2: Geometric processing...\n");
-        if (mirror) {
-            snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d -flop \"%s\"",
-                magick_cmd, temp_path, rotation, output_path);
-        } else {
-            snprintf(cmd, sizeof(cmd), 
-                "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -rotate %d \"%s\"",
-                magick_cmd, temp_path, rotation, output_path);
-        }
+        // Phase 2: Color operations with memory limits (ImageMagick 6.x compatible)
+        printf("Phase 2: Color processing (memory-limited mode)...\n");
+        snprintf(cmd, sizeof(cmd), 
+            "%s \"%s\" -limit memory 64MB -limit map 128MB -define registry:temporary-path=/tmp -colors %d -dither FloydSteinberg -colorspace Gray -type Palette -define bmp:format=bmp3 -depth 4 \"%s\"",
+            magick_cmd, temp_path, colors, output_path);
         
         printf("Converting image (Phase 2): %s\n", cmd);
         result = system(cmd);
